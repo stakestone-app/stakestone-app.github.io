@@ -3,356 +3,185 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>StakeStone - Decentralized DeFi Portal</title>
-  <meta name="description" content="Secure, non-custodial portal for StakeStone DeFi operations directly from your own wallet.">
+  <title>StakeStone - Earn With STONE</title>
+  <meta name="description" content="StakeStone turns ETH into STONE for liquid DeFi earning across supported chains. Connect your wallet, preview the route, and start in the app.">
+  <meta name="theme-color" content="#FBFAF7">
   <link rel="canonical" href="https://stakestone-app.github.io/">
   <meta name="robots" content="index,follow">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
   <link rel="manifest" href="site.webmanifest">
   <link rel="prefetch" href="dashboard/">
-  <link rel="prerender" href="dashboard/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="StakeStone - Earn With STONE">
+  <meta property="og:description" content="StakeStone makes ETH staking liquidity usable as STONE across supported DeFi networks from your own wallet.">
+  <meta property="og:image" content="og-cover.png">
+  <meta property="og:url" content="https://stakestone-app.github.io/">
   <style>
+  :root{
+    --bg:#FBFAF7; --panel:#FFFFFF; --field:#F7F4EE;
+    --ink:#1A1512; --muted:#6E665E; --faint:#9C958B;
+    --line:rgba(26,21,18,.09); --line-2:rgba(26,21,18,.05);
+    --accent:#4F46E5; --accent-ink:#3A33A9; --accent-soft:rgba(79,70,229,.10);
+    --pos:#15A34A;
+    --radius:22px; --radius-sm:14px;
+    --shadow-card:0 1px 0 rgba(26,21,18,.03), 0 34px 64px -30px rgba(80,30,20,.30), 0 10px 24px -18px rgba(80,30,20,.18);
+    --shadow-soft:0 1px 0 rgba(26,21,18,.02), 0 20px 44px -32px rgba(80,30,20,.26);
+    --ui:"Space Grotesk",-apple-system,system-ui,sans-serif;
+    --body:"Inter",-apple-system,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; overflow-x:hidden}
+  body{background:var(--bg); color:var(--ink); font-family:var(--body); line-height:1.55; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; position:relative}
+  a{color:inherit; text-decoration:none}
+  a.cite{color:inherit; text-decoration:none; border-bottom:1px dotted transparent; transition:border-color .15s ease}
+  a.cite:hover{border-bottom-color:var(--faint)}
+  img{display:block; max-width:100%}
+  button{font:inherit; cursor:pointer; border:none; background:none; color:inherit}
+  h1,h2,h3,p{margin:0}
 
+  /* ---------- texture (dot matrix + warm glow) ---------- */
+  .bg{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
+  .bg .glow{position:absolute; inset:0; background:
+      radial-gradient(700px 480px at 78% -6%, rgba(79,70,229,.12), transparent 62%),
+      radial-gradient(680px 520px at 6% 18%, rgba(79,70,229,.07), transparent 60%);}
+  .bg .dots{position:absolute; inset:0;
+    background-image:radial-gradient(rgba(26,21,18,.06) 1px, transparent 1.4px); background-size:23px 23px;
+    -webkit-mask-image:radial-gradient(130% 90% at 50% 10%, #000 44%, transparent 88%);
+            mask-image:radial-gradient(130% 90% at 50% 10%, #000 44%, transparent 88%);}
 
-:root{
-  --bg:#F7F2EA;
-  --bg-2:#FBF8F2;
-  --surface:#FFFFFF;
-  --inset:#F4EFE6;
-  --ink:#171512;
-  --muted:#665F55;
-  --faint:#9B9184;
-  --accent:#C8A86B;
-  --accent-soft:rgba(200,168,107,.18);
-  --line:rgba(33,29,24,.10);
-  --line-strong:rgba(33,29,24,.16);
-  --shadow:0 28px 70px -38px rgba(57,47,33,.48), 0 8px 24px -18px rgba(57,47,33,.26);
-}
+  /* ---------- top bar ---------- */
+  .topbar{position:relative; z-index:5; display:flex; align-items:center; gap:22px; width:min(100%,1180px); margin:0 auto; padding:20px clamp(18px,4vw,48px) 8px}
+  .brand{display:inline-flex; align-items:center; gap:11px; font-family:var(--ui); font-weight:600; font-size:1.05rem; letter-spacing:-.01em}
+  .brand img{width:30px; height:30px; border-radius:8px; box-shadow:0 0 0 1px rgba(255,255,255,.8), 0 8px 18px -12px rgba(79,70,229,.5)}
+  .spacer{flex:1}
+  .nav{display:flex; align-items:center; gap:clamp(16px,2.6vw,30px)}
+  .nav a{font-family:var(--ui); font-weight:500; font-size:.92rem; color:var(--muted); transition:color .16s ease}
+  .nav a:hover{color:var(--accent-ink)}
 
-*{box-sizing:border-box}
-html,body{height:100%}
-html{overflow-x:hidden}
-body{
-  margin:0;
-  min-height:100dvh;
-  overflow:hidden;
-  color:var(--ink);
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-  line-height:1.5;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-  background:
-    radial-gradient(70% 44% at 50% -12%, rgba(200,168,107,.20), transparent 62%),
-    linear-gradient(180deg,var(--bg-2) 0%,var(--bg) 100%);
-  display:flex;
-  flex-direction:column;
-}
+  /* ---------- section frame (mobile-safe: vertical padding only) ---------- */
+  .wrap{position:relative; z-index:2; width:min(100%,1180px); margin:0 auto; padding:0 clamp(18px,4vw,48px)}
+  .sec{padding-top:clamp(50px,7vh,90px); padding-bottom:clamp(50px,7vh,90px)}
+  .sec-head{max-width:60ch; margin:0 0 clamp(26px,4vh,40px)}
+  .eyebrow{display:inline-flex; align-items:center; gap:9px; font-family:var(--ui); font-weight:600; font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-ink)}
+  .eyebrow .dot{width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px var(--accent-soft)}
+  .eyebrow svg{width:15px; height:15px}
+  .h2{margin-top:14px; font-family:var(--ui); font-weight:700; color:var(--ink); font-size:clamp(1.9rem,3.4vw,2.7rem); line-height:1.04; letter-spacing:-.02em}
+  .sec-head p{margin-top:14px; color:var(--muted); font-size:clamp(1rem,1.3vw,1.12rem); line-height:1.6}
 
-a{color:inherit;text-decoration:none}
-img{display:block;max-width:100%}
-h1,p{margin:0}
-h1{line-height:1.04;letter-spacing:0}
+  /* ---------- hero ---------- */
+  .hero{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(360px,.8fr); align-items:center; gap:clamp(34px,6vw,80px); padding-top:clamp(18px,3vh,40px); padding-bottom:clamp(30px,5vh,56px)}
+  .copy{min-width:0}
+  .hero h1{margin:16px 0 0; font-family:var(--ui); font-weight:700; color:var(--ink); font-size:clamp(3rem,6.4vw,5.2rem); line-height:.98; letter-spacing:-.03em}
+  .deck{max-width:46ch; margin:20px 0 0; color:var(--muted); font-size:clamp(1.04rem,1.35vw,1.18rem); line-height:1.6}
+  .deck strong{color:var(--ink); font-weight:600; box-shadow:inset 0 -.36em 0 var(--accent-soft)}
+  .chips{list-style:none; margin:26px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:9px}
+  .chips li{display:inline-flex; align-items:center; gap:7px; min-height:38px; padding:8px 14px; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.7); font-family:var(--ui); font-weight:500; font-size:.88rem; color:var(--ink)}
+  .chips li::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--accent)}
+  .cta-row{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin:30px 0 0}
+  .primary{display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:54px; padding:0 28px; border-radius:14px; background:var(--ink); color:#fff; font-family:var(--ui); font-weight:600; font-size:1.02rem; letter-spacing:-.01em; box-shadow:0 16px 30px -16px rgba(26,21,18,.7); transition:transform .18s ease, box-shadow .18s ease, filter .18s ease}
+  .primary:hover{transform:translateY(-1px); filter:brightness(1.08); box-shadow:0 22px 38px -16px rgba(26,21,18,.8)}
+  .primary svg{width:17px; height:17px}
+  .ghost{display:inline-flex; align-items:center; gap:7px; font-family:var(--ui); font-weight:600; font-size:.98rem; color:var(--muted); transition:color .16s ease}
+  .ghost:hover{color:var(--accent-ink)}
+  .ghost svg{width:15px; height:15px}
 
-.topbar{
-  flex:none;
-  width:100%;
-  display:flex;
-  align-items:center;
-  gap:18px;
-  padding:18px clamp(18px,4vw,42px);
-}
+  /* ---------- stake card ---------- */
+  .card{width:min(100%,400px); margin:0 0 0 auto; padding:14px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-card); position:relative}
+  .card::before{content:""; position:absolute; inset:0 0 auto; height:1px; border-radius:var(--radius) var(--radius) 0 0; background:linear-gradient(90deg, transparent, rgba(79,70,229,.4), transparent)}
+  .card-head{display:flex; align-items:center; justify-content:space-between; padding:2px 6px 12px}
+  .card-head .ct{font-family:var(--ui); font-weight:600; font-size:1.04rem; letter-spacing:-.01em}
+  .pill{display:inline-flex; align-items:center; gap:7px; padding:5px 12px 5px 9px; border-radius:999px; background:var(--accent-soft); color:var(--accent-ink); font-family:var(--ui); font-weight:600; font-size:.76rem}
+  .pill .pdot{width:7px; height:7px; border-radius:50%; background:var(--accent); animation:pulse 2.4s ease-out infinite}
+  .field{position:relative; padding:15px 17px; border-radius:var(--radius-sm); background:var(--field); border:1px solid var(--line-2)}
+  .field + .field{margin-top:6px}
+  .flabel{display:block; color:var(--muted); font-size:.82rem; font-weight:500; margin-bottom:12px}
+  .frow{display:flex; align-items:center; justify-content:space-between; gap:12px}
+  .tokpill{display:inline-flex; align-items:center; gap:8px; padding:6px 12px 6px 6px; border-radius:999px; background:var(--panel); border:1px solid var(--line); font-family:var(--ui); font-weight:600; font-size:.98rem; box-shadow:0 1px 0 rgba(26,21,18,.02)}
+  .tokpill img{width:24px; height:24px; border-radius:50%}
+  .ghostval{color:var(--faint); font-size:.9rem; font-weight:450; white-space:nowrap}
+  .conv{position:relative; height:0}
+  .conv span{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:38px; height:38px; border-radius:50%; z-index:3; background:var(--panel); border:4px solid var(--panel); box-shadow:0 0 0 1px var(--line), 0 8px 18px -10px rgba(80,30,20,.4); display:grid; place-items:center; color:var(--accent-ink)}
+  .conv svg{width:17px; height:17px}
+  .yield{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px; padding:12px 15px; border-radius:12px; background:var(--accent-soft)}
+  .yield .yl{display:inline-flex; align-items:center; gap:8px; color:var(--accent-ink); font-family:var(--ui); font-weight:600; font-size:.88rem}
+  .yield .yl svg{width:16px; height:16px}
+  .yield .yr{color:var(--accent-ink); font-weight:600; font-size:.82rem; white-space:nowrap}
+  .cta{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:8px; min-height:52px; border-radius:14px; background:var(--ink); color:#fff; font-family:var(--ui); font-weight:600; font-size:1rem; letter-spacing:-.01em; box-shadow:0 14px 28px -16px rgba(26,21,18,.65); transition:transform .18s ease, filter .18s ease}
+  .cta:hover{transform:translateY(-1px); filter:brightness(1.08)}
+  .note{margin:11px 0 2px; text-align:center; color:var(--faint); font-size:.78rem}
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-  font-size:1.05rem;
-  font-weight:800;
-}
+  /* ---------- how it works ---------- */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+  .step{padding:24px 22px; background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow-soft); border-top:3px solid var(--accent)}
+  .step .num{font-family:var(--ui); font-weight:700; font-size:.92rem; color:var(--accent-ink)}
+  .step h3{margin:12px 0 8px; font-family:var(--ui); font-weight:600; font-size:1.12rem; color:var(--ink); letter-spacing:-.01em}
+  .step p{color:var(--muted); font-size:.94rem; line-height:1.55}
 
-.brand img{
-  width:30px;
-  height:30px;
-  border-radius:9px;
-  box-shadow:0 0 0 1px var(--line);
-  flex:none;
-}
+  /* ---------- why / rewards ---------- */
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+  .ben{padding:24px 22px; background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow-soft)}
+  .ben .ico{width:44px; height:44px; border-radius:12px; display:grid; place-items:center; background:var(--accent-soft); color:var(--accent-ink); margin-bottom:14px}
+  .ben .ico svg{width:21px; height:21px}
+  .ben h3{font-family:var(--ui); font-weight:600; font-size:1.12rem; color:var(--ink); letter-spacing:-.01em}
+  .ben p{margin-top:8px; color:var(--muted); font-size:.94rem; line-height:1.55}
 
-.nav{
-  display:flex;
-  align-items:center;
-  gap:26px;
-  margin-left:12px;
-  white-space:nowrap;
-}
+  /* ---------- networks strip ---------- */
+  .netband{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px; padding:22px 24px; background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow-soft)}
+  .netband .nt{font-family:var(--ui); font-weight:600; color:var(--ink); font-size:1.02rem; max-width:34ch}
+  .nets{display:flex; flex-wrap:wrap; gap:9px}
+  .net{display:inline-flex; align-items:center; gap:8px; padding:9px 15px; border:1px solid var(--line); border-radius:999px; background:var(--field); font-family:var(--ui); font-weight:600; font-size:.88rem; color:var(--ink)}
+  .net .nd{width:8px; height:8px; border-radius:50%; background:var(--accent)}
+  .netband .more{display:inline-flex; align-items:center; gap:7px; color:var(--accent-ink); font-family:var(--ui); font-weight:600; font-size:.92rem; white-space:nowrap}
+  .netband .more svg{width:15px; height:15px}
 
-.nav a{
-  color:var(--muted);
-  font-size:.92rem;
-  font-weight:560;
-  transition:color .16s ease;
-}
+  /* ---------- FAQ (2-col grid of cards) ---------- */
+  .faq{display:grid; grid-template-columns:repeat(2,1fr); gap:14px}
+  .qa{padding:22px; background:var(--panel); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow-soft)}
+  .qa .qn{font-family:var(--ui); font-weight:700; font-size:.8rem; color:var(--accent-ink); letter-spacing:.04em}
+  .qa h3{margin:8px 0 8px; font-family:var(--ui); font-weight:600; font-size:1.08rem; color:var(--ink); letter-spacing:-.01em}
+  .qa p{color:var(--muted); font-size:.95rem; line-height:1.6}
+  .qa a:not(.cite){color:var(--accent-ink); font-weight:600; box-shadow:inset 0 -.34em 0 var(--accent-soft)}
 
-.nav a:hover{color:var(--ink)}
-.sp{flex:1}
+  /* ---------- related ---------- */
+  .related{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+  .rel{display:flex; flex-direction:column; gap:7px; padding:22px; background:var(--panel); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow-soft); transition:transform .16s ease, border-color .16s ease}
+  .rel:hover{transform:translateY(-2px); border-color:rgba(79,70,229,.35)}
+  .rel .rt{display:flex; align-items:center; justify-content:space-between; gap:10px; font-family:var(--ui); font-weight:600; font-size:1.05rem; color:var(--ink); letter-spacing:-.01em}
+  .rel .rt svg{width:16px; height:16px; color:var(--accent-ink); flex:none}
+  .rel p{color:var(--muted); font-size:.9rem; line-height:1.5}
 
-.ghost{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-height:38px;
-  padding:0 17px;
-  border:1px solid var(--line-strong);
-  border-radius:999px;
-  background:rgba(255,255,255,.48);
-  color:var(--ink);
-  font-size:.9rem;
-  font-weight:760;
-  box-shadow:0 10px 24px -20px rgba(33,29,24,.55);
-  transition:transform .16s ease,border-color .16s ease,background .16s ease;
-}
+  /* ---------- footer ---------- */
+  .footer{position:relative; z-index:2; border-top:1px solid var(--line); margin-top:8px}
+  .footer .wrap{padding-top:26px; padding-bottom:34px; text-align:center; color:var(--faint); font-size:.84rem}
+  .footer b{color:var(--muted); font-weight:600}
 
-.ghost:hover{
-  transform:translateY(-1px);
-  border-color:rgba(200,168,107,.52);
-  background:#fff;
-}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent-soft)} 70%{box-shadow:0 0 0 8px rgba(79,70,229,0)} 100%{box-shadow:0 0 0 0 rgba(79,70,229,0)}}
 
-.stage{
-  flex:1;
-  min-height:0;
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:10px clamp(18px,4vw,42px) 8px;
-}
-
-.hero{
-  width:min(720px,100%);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-
-.hero h1{
-  font-size:clamp(3.05rem,6.4vw,5.05rem);
-  font-weight:820;
-}
-
-.sub{
-  max-width:50ch;
-  margin-top:14px;
-  color:var(--muted);
-  font-size:clamp(1rem,1.6vw,1.2rem);
-}
-
-.sub strong{
-  color:var(--ink);
-  font-weight:800;
-  box-shadow:inset 0 -.48em 0 var(--accent-soft);
-}
-
-.card{
-  width:min(560px,100%);
-  margin-top:30px;
-  padding:20px;
-  border:1px solid var(--line);
-  border-radius:24px;
-  background:linear-gradient(180deg,#fff 0%,#FFFEFB 100%);
-  box-shadow:var(--shadow);
-}
-
-.card-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  margin-bottom:14px;
-  text-align:left;
-}
-
-.card-title{
-  color:var(--ink);
-  font-size:.95rem;
-  font-weight:820;
-}
-
-.badge{
-  min-width:0;
-  color:var(--ink);
-  border:1px solid rgba(200,168,107,.38);
-  background:var(--accent-soft);
-  border-radius:999px;
-  padding:6px 10px;
-  font-size:.74rem;
-  font-weight:780;
-  line-height:1.1;
-  white-space:normal;
-}
-
-.route{
-  display:flex;
-  align-items:stretch;
-  gap:12px;
-}
-
-.leg{
-  flex:1;
-  min-width:0;
-  padding:14px 15px;
-  border:1px solid var(--line);
-  border-radius:16px;
-  background:var(--inset);
-  text-align:left;
-}
-
-.lbl{
-  display:block;
-  color:var(--faint);
-  font-size:.69rem;
-  font-weight:820;
-  letter-spacing:.08em;
-  line-height:1;
-  text-transform:uppercase;
-}
-
-.chip{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-  margin-top:10px;
-}
-
-.ic{
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  flex:none;
-}
-
-.token{
-  min-width:0;
-  overflow-wrap:anywhere;
-  color:var(--ink);
-  font-size:1.08rem;
-  font-weight:840;
-  line-height:1.1;
-}
-
-.dir{
-  flex:none;
-  align-self:center;
-  width:42px;
-  height:42px;
-  display:grid;
-  place-items:center;
-  border:1px solid var(--line-strong);
-  border-radius:50%;
-  background:#fff;
-  color:var(--muted);
-  cursor:pointer;
-  box-shadow:0 12px 28px -22px rgba(33,29,24,.58);
-  transition:transform .16s ease,color .16s ease,border-color .16s ease,background .16s ease;
-}
-
-.dir span{
-  display:block;
-  font-size:1.15rem;
-  line-height:1;
-}
-
-.dir:hover{
-  transform:translateY(-1px);
-  color:var(--accent);
-  border-color:rgba(200,168,107,.54);
-  background:#FFFCF6;
-}
-
-.act{
-  width:100%;
-  min-height:54px;
-  margin-top:16px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  border-radius:16px;
-  background:var(--accent);
-  color:#171512;
-  font-size:1.04rem;
-  font-weight:860;
-  box-shadow:0 18px 30px -22px rgba(168,132,69,.72);
-  transition:transform .16s ease,background .16s ease,box-shadow .16s ease;
-}
-
-.act:hover{
-  transform:translateY(-1px);
-  background:var(--accent);
-  box-shadow:0 20px 36px -22px rgba(168,132,69,.82);
-}
-
-.foot{
-  flex:none;
-  padding:17px 24px 22px;
-  color:var(--faint);
-  text-align:center;
-  font-size:.84rem;
-  font-weight:620;
-}
-
-@media(max-width:720px){
-  .topbar{gap:12px}
-  .nav{display:none}
-  .brand span{font-size:1rem}
-}
-
-@media(max-width:520px){
-  .topbar{padding:14px 16px}
-  .ghost{min-height:36px;padding:0 14px;font-size:.86rem}
-  .stage{padding:4px 16px 6px;justify-content:center}
-  .hero h1{font-size:3rem}
-  .sub{max-width:31ch;margin-top:11px;font-size:.98rem;line-height:1.42}
-  .card{margin-top:22px;padding:16px;border-radius:21px}
-  .card-head{align-items:flex-start;margin-bottom:12px}
-  .badge{max-width:190px;text-align:right}
-  .route{flex-direction:column;gap:10px}
-  .leg{padding:12px 13px;border-radius:14px}
-  .chip{margin-top:8px}
-  .dir{width:40px;height:40px}
-  .dir span{transform:rotate(90deg)}
-  .act{min-height:50px;margin-top:14px;border-radius:14px}
-  .foot{padding:12px 20px 15px}
-}
-
-@media(max-width:380px){
-  .brand{gap:8px}
-  .brand img{width:28px;height:28px}
-  .hero h1{font-size:2.72rem}
-  .sub{font-size:.94rem}
-  .card{margin-top:18px;padding:14px}
-  .card-head{gap:10px}
-  .badge{font-size:.7rem;padding:6px 8px}
-}
-
-
-  
-.footer {
-  text-align: center !important;
-}
+  @media (max-width:920px){
+    .nav{display:none}
+    .hero{grid-template-columns:1fr; gap:30px}
+    .card{margin:0 auto}
+    .hero h1{font-size:clamp(2.8rem,12vw,3.8rem)}
+    .deck{max-width:none}
+    .steps,.grid3,.faq,.related{grid-template-columns:1fr}
+    .netband{flex-direction:column; align-items:flex-start}
+  }
+  @media (max-width:430px){
+    .chips{gap:7px}
+    .primary,.ghost{width:100%; justify-content:center}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important; transition-duration:.01ms!important}}
   </style>
 </head>
 <body>
+  <div class="bg" aria-hidden="true"><div class="glow"></div><div class="dots"></div></div>
+
   <header class="topbar">
-    <div class="brand">
+    <a class="brand" href="./">
       <img src="favicon.png" width="30" height="30" alt="">
       <span>StakeStone</span>
-    </div>
+    </a>
     <span class="spacer"></span>
     <nav class="nav" aria-label="Main Navigation">
       <a href="how-it-works/">How it works</a>
@@ -362,11 +191,218 @@ h1{line-height:1.04;letter-spacing:0}
       <a href="supported-chains/">Supported Chains</a>
     </nav>
   </header>
-  <main class="stage" style="padding: 100px 24px; text-align: center; max-width: 800px; margin: 0 auto;">
-    <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); margin-bottom: 24px; font-weight: 800;">StakeStone</h1>
-    <p class="value" style="font-size: 1.25rem; opacity: 0.8; margin-bottom: 40px; line-height: 1.6;">Secure, non-custodial gateway for decentralized operations. Connect your Web3 wallet to enter the portal.</p>
-    <a class="open-app" href="dashboard/" style="display: inline-flex; justify-content: center; align-items: center; min-height: 52px; padding: 0 32px; border-radius: 9999px; background: var(--accent, #625bf3); color: #fff; font-weight: 700; text-decoration: none; font-size: 1.1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transition: transform 0.2s ease;">Open App Dashboard</a>
+
+  <main>
+    <!-- HERO -->
+    <section class="wrap hero">
+      <div class="copy">
+        <span class="eyebrow"><span class="dot"></span>Liquid DeFi Staking</span>
+        <h1>StakeStone</h1>
+        <p class="deck">StakeStone is a non-custodial DeFi app for turning ETH into STONE and putting yield-bearing liquidity to work across supported networks. Start from the <a class="cite" href="https://stakestone.io/" rel="nofollow noopener noreferrer">official product site</a>, connect your wallet, and keep the flow <strong>self-custodied</strong> from preview to confirmation.</p>
+        <ul class="chips">
+          <li>ETH to STONE</li>
+          <li>Non-custodial</li>
+          <li>Omnichain liquidity</li>
+          <li>Live app preview</li>
+        </ul>
+        <div class="cta-row">
+          <a class="primary" href="dashboard/">
+            Open App
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a class="ghost" href="how-it-works/">
+            How it works
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <section class="card" aria-label="Stake preview">
+        <div class="card-head">
+          <span class="ct">Stake</span>
+          <span class="pill"><span class="pdot"></span>Preview</span>
+        </div>
+        <div class="field">
+          <span class="flabel">Stake</span>
+          <div class="frow">
+            <span class="tokpill"><img src="eth.png" alt="ETH">ETH</span>
+            <span class="ghostval">Amount in app</span>
+          </div>
+        </div>
+        <div class="conv">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span>
+        </div>
+        <div class="field">
+          <span class="flabel">You receive</span>
+          <div class="frow">
+            <span class="tokpill"><img src="stone.png" alt="STONE">STONE</span>
+            <span class="ghostval">Balance in app</span>
+          </div>
+        </div>
+        <div class="yield">
+          <span class="yl">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M21 7v5M21 7h-5"/></svg>
+            Est. APR
+          </span>
+          <span class="yr">Live rate in app</span>
+        </div>
+        <a class="cta" href="dashboard/">Open App</a>
+        <p class="note">Preview only &middot; non-custodial &middot; live app terms apply</p>
+      </section>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="wrap sec" id="how">
+      <div class="sec-head">
+        <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>How it works</span>
+        <h2 class="h2">StakeStone in three clear steps</h2>
+        <p>The flow is built for wallet-native DeFi users: preview the asset path, sign from your wallet, and track the position on-chain instead of handing custody to a centralized account.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <span class="num">Step 01</span>
+          <h3>Connect your wallet</h3>
+          <p>Open the app and connect a compatible wallet. You keep the keys, review each transaction, and use the same wallet model common across <a class="cite" href="https://ethereum.org/en/wallets/" rel="nofollow noopener noreferrer">Ethereum wallets</a>.</p>
+        </div>
+        <div class="step">
+          <span class="num">Step 02</span>
+          <h3>Preview ETH to STONE</h3>
+          <p>Choose the ETH amount, review the STONE output, the route, the live rate, and the network cost shown inside the app before you approve anything.</p>
+        </div>
+        <div class="step">
+          <span class="num">Step 03</span>
+          <h3>Confirm and manage</h3>
+          <p>Sign the transaction from your wallet, then manage the STONE position through StakeStone's app, supported DeFi venues, or direct on-chain records.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHY / REWARDS -->
+    <section class="wrap sec" id="why">
+      <div class="sec-head">
+        <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M21 7v5M21 7h-5"/></svg>Why StakeStone</span>
+        <h2 class="h2">Liquid staking infrastructure without giving up wallet control</h2>
+      </div>
+      <div class="grid3">
+        <div class="ben">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg></span>
+          <h3>Yield-bearing liquidity</h3>
+          <p>STONE is designed as an ETH-backed yield-bearing asset for DeFi. It lets you keep exposure to staking-style returns while using liquid positions in compatible markets.</p>
+        </div>
+        <div class="ben">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 5v5l3 3"/></svg></span>
+          <h3>Built for omnichain use</h3>
+          <p>StakeStone routes asset and price information across supported networks, using cross-chain infrastructure such as <a class="cite" href="https://layerzero.network/" rel="nofollow noopener noreferrer">LayerZero messaging</a> where the product supports it.</p>
+        </div>
+        <div class="ben">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.5M21 4v5h-5"/></svg></span>
+          <h3>Clear before you sign</h3>
+          <p>Rates, routes, timing, and costs can move with market and network conditions. The app shows live details before wallet confirmation so you can make the final call.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- NETWORKS -->
+    <section class="wrap sec" id="networks">
+      <div class="netband">
+        <p class="nt">StakeStone focuses on STONE liquidity for Ethereum and supported EVM networks, with final availability always shown in the app.</p>
+        <div class="nets">
+          <span class="net"><span class="nd"></span>Ethereum</span>
+          <span class="net"><span class="nd"></span>Base</span>
+          <span class="net"><span class="nd"></span>Linea</span>
+          <span class="net"><span class="nd"></span>Mantle</span>
+          <span class="net"><span class="nd"></span>Arbitrum</span>
+        </div>
+        <a class="more" href="supported-chains/">See supported chains
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="wrap sec" id="faq">
+      <div class="sec-head">
+        <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .8-1 1.7M12 17h.01"/></svg>FAQ</span>
+        <h2 class="h2">StakeStone staking questions</h2>
+      </div>
+      <div class="faq">
+        <div class="qa">
+          <span class="qn">01</span>
+          <h3>What is StakeStone?</h3>
+          <p>StakeStone is a non-custodial DeFi app and yield infrastructure for STONE, an ETH-focused yield-bearing asset designed for liquid use across supported networks.</p>
+        </div>
+        <div class="qa">
+          <span class="qn">02</span>
+          <h3>What asset do I receive?</h3>
+          <p>The ETH staking flow previews STONE in the app. STONE is meant to represent ETH-based yield exposure while remaining usable in compatible DeFi markets.</p>
+        </div>
+        <div class="qa">
+          <span class="qn">03</span>
+          <h3>How long does staking take?</h3>
+          <p>Timing depends on wallet approval, network congestion, and the live route. The app shows the transaction state while on-chain settlement is pending.</p>
+        </div>
+        <div class="qa">
+          <span class="qn">04</span>
+          <h3>What does it cost?</h3>
+          <p>You pay network gas and any live route costs shown before confirmation. You can compare the on-chain fee environment with public tools such as the <a class="cite" href="https://etherscan.io/gastracker" rel="nofollow noopener noreferrer">Ethereum gas tracker</a>.</p>
+        </div>
+        <div class="qa">
+          <span class="qn">05</span>
+          <h3>Which chains are supported?</h3>
+          <p>StakeStone has focused on Ethereum and supported EVM networks for STONE liquidity. Check the <a href="supported-chains/">supported chains</a> page and the app for current availability.</p>
+        </div>
+        <div class="qa">
+          <span class="qn">06</span>
+          <h3>Is StakeStone safe?</h3>
+          <p>StakeStone is non-custodial, but DeFi still carries smart contract, market, asset, oracle, and cross-chain risk. Review the app details and broader <a class="cite" href="https://defillama.com/" rel="nofollow noopener noreferrer">DeFi market data</a> before using it.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RELATED -->
+    <section class="wrap sec" id="explore">
+      <div class="sec-head">
+        <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>Learn more</span>
+        <h2 class="h2">Explore StakeStone</h2>
+      </div>
+      <div class="related">
+        <a class="rel" href="how-it-works/">
+          <span class="rt">How it works <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          <p>The full flow for connecting a wallet, previewing ETH to STONE, and confirming from your own wallet.</p>
+        </a>
+        <a class="rel" href="security/">
+          <span class="rt">Security <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          <p>What non-custodial staking means, which risks still matter, and what to review before signing.</p>
+        </a>
+        <a class="rel" href="supported-chains/">
+          <span class="rt">Supported chains <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          <p>The networks and assets to check before using STONE liquidity in the app.</p>
+        </a>
+      </div>
+    </section>
   </main>
-  <footer class="footer">StakeStone &mdash; 2026</footer>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p>Information on this page is for educational purposes only and is not financial advice.</p>
+      <p style="margin-top:6px"><b>StakeStone</b></p>
+    </div>
+  </footer>
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@graph":[
+    {"@type":"WebSite","@id":"https://stakestone-app.github.io/#website","url":"https://stakestone-app.github.io/","name":"StakeStone"},
+    {"@type":"Organization","@id":"https://stakestone-app.github.io/#org","name":"StakeStone","url":"https://stakestone-app.github.io/","logo":"https://stakestone-app.github.io/favicon.png"},
+    {"@type":"WebApplication","name":"StakeStone","applicationCategory":"FinanceApplication","operatingSystem":"Web","url":"https://stakestone-app.github.io/","browserRequirements":"Requires a Web3 wallet","description":"Non-custodial DeFi app for turning ETH into STONE and managing yield-bearing liquidity across supported networks."},
+    {"@type":"FAQPage","mainEntity":[
+      {"@type":"Question","name":"What is StakeStone?","acceptedAnswer":{"@type":"Answer","text":"StakeStone is a non-custodial DeFi app and yield infrastructure for STONE, an ETH-focused yield-bearing asset designed for liquid use across supported networks."}},
+      {"@type":"Question","name":"What asset do I receive?","acceptedAnswer":{"@type":"Answer","text":"The ETH staking flow previews STONE in the app. STONE is meant to represent ETH-based yield exposure while remaining usable in compatible DeFi markets."}},
+      {"@type":"Question","name":"How long does staking take?","acceptedAnswer":{"@type":"Answer","text":"Timing depends on wallet approval, network congestion, and the live route. The app shows the transaction state while on-chain settlement is pending."}},
+      {"@type":"Question","name":"What does it cost?","acceptedAnswer":{"@type":"Answer","text":"You pay network gas and any live route costs shown before confirmation. You can compare the on-chain fee environment with public tools such as the Ethereum gas tracker."}},
+      {"@type":"Question","name":"Which chains are supported?","acceptedAnswer":{"@type":"Answer","text":"StakeStone has focused on Ethereum and supported EVM networks for STONE liquidity. Check the supported chains page and the app for current availability."}},
+      {"@type":"Question","name":"Is StakeStone safe?","acceptedAnswer":{"@type":"Answer","text":"StakeStone is non-custodial, but DeFi still carries smart contract, market, asset, oracle, and cross-chain risk. Review the app details and broader DeFi market data before using it."}}
+    ]}
+  ]}
+  </script>
 </body>
 </html>
