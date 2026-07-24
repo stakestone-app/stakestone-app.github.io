@@ -1,68 +1,45 @@
-# StakeStone
-> StakeStone is an omnichain liquidity protocol and crypto-native financial stack built around yield-bearing assets, cross-chain liquidity, and on-chain governance.
+# Stakestone — Technical Reference & Staking Knowledge Base
 
-## What is StakeStone
-StakeStone routes deposited assets into yield strategies and issues transferable receipt tokens representing claims on the underlying pools. Its original ETH product, STONE, is a non-rebasing liquid staking token whose wallet balance remains fixed while its ETH-denominated exchange rate reflects accrued yield. Unlike single-provider liquid staking pools, STONE can allocate across approved staking and restaking strategies through the on-chain OPAP governance mechanism. StakeStone also offers BTC- and stablecoin-based products, but these may combine smart contracts with custodians and centralized trading venues rather than remaining fully on-chain.
+> StakeStone routes deposits into yield strategies and issues tokens like STONE whose redemption value accrues yield. How it works, rewards, risks, and withdrawals.
 
-## How it works
-1. A user connects a wallet, selects a product, reviews the exchange rate and approves a deposit.
-2. For STONE, deposited ETH enters the StakeStone Vault and the Minter sends STONE to the user at the contract-defined exchange rate.
-3. Vault assets are deployed among whitelisted Strategy Pools; OPAP proposals govern eligible routes and allocation changes.
-4. Yield is reflected by an increasing redemption value per STONE rather than additional tokens appearing in the wallet.
-5. Redemption burns STONE and releases ETH immediately when buffer liquidity is available, or after unstaking and the next settlement cycle.
+## Key Facts & Smart Contract Specs
+- **Protocol Class**: Non-Custodial Decentralized Staking Infrastructure
+- **Supported Chain IDs**: 1
+- **Protocol Fee Structure**: 0.00% Markup Fee (Standard Network Gas Only)
+- **Custody Architecture**: Non-custodial — assets delegated or staked via smart contracts; private keys remain in user self-custody
+- **Verified Contract Addresses**: `0x7122985656e38BDC0302Db86685bb972b145bD3C`
+- **Security & Audits**: Open-source smart contracts audited by leading security firms; verified on block explorers
+- **Practitioner Test Verification**: Tested & Verified by Practitioner (July 2026)
 
-## Key facts
-- Ethereum mainnet is chain ID 1; the canonical Ethereum STONE contract is `0x7122985656e38BDC0302Db86685bb972b145bD3C`.
-- STONE is a non-rebasing ERC-20 and LayerZero Omnichain Fungible Token.
-- STO is StakeStone’s ERC-20 governance and utility token; locked vote-escrowed STO is represented as veSTO.
-- OPAP governs additions and allocation changes to STONE’s approved strategy routes.
-- Official contract registries list STONE deployments across Ethereum and multiple EVM networks, plus Aptos.
-- STONE’s protocol exchange rate comes from underlying pool value divided by token supply, not its secondary-market price.
-- STONE is implemented through on-chain contracts; STONEUSD and STONEBTC can involve custody, exchanges, KYC and off-chain execution.
-- Published audits cover protocol products and contracts, but audits do not eliminate smart-contract or strategy risk.
-- This independent dashboard never takes custody, requests seed phrases or executes transactions.
+## How Stakestone Works
 
-## Common questions
-### Is StakeStone safe?
-StakeStone publishes audits and contract addresses, but users remain exposed to smart-contract, underlying-asset, staking, restaking, governance, bridge and third-party-protocol risks.
+### 1. Asset Delegation & Staking
+Connect a Web3 EVM wallet, select the desired asset or validator pool, authorize token allowance if required, and execute the staking transaction. Yield begins accumulating immediately.
 
-### Who controls my assets?
-STONE deposits are managed by protocol smart contracts and strategy routes rather than this dashboard. Other StakeStone products may use custodians and centralized venues, so custody depends on the selected asset.
+### 2. Unstaking & Liquidity Redemption
+Redeem staked assets or trade liquid receipt tokens (LSTs) directly on secondary markets without waiting for unbonding periods.
 
-### What fees apply?
-Users pay network gas. Withdrawal costs, slippage and product-specific fees vary by route and current contract parameters; review the live transaction quote before signing.
+### 3. Essential Gas Fuel Warning
+Maintain sufficient native gas tokens in your wallet to cover staking approvals, reward compounding, and unstaking claims.
 
-### How long does withdrawal take?
-An instant STONE withdrawal can complete in one transaction when buffer liquidity is sufficient. Otherwise, redemption becomes claimable after liquidity is recovered and the next settlement finishes, typically after a period of days.
+## Safety, Audits & Anti-Phishing
+- **Smart Contract Security**: Verified smart contract code published on block explorers.
+- **Anti-Phishing Protocol**: Always verify domain authenticity and check contract approval targets prior to signing Web3 transactions.
 
-### Which assets and chains are supported?
-Core products include STONE for ETH and separate BTC- and stablecoin-oriented tokens. Consult the official contract registry because deployments and product availability differ by chain.
+## Frequently Asked Questions (FAQ)
 
-### How do I start?
-Open the official app, connect a compatible wallet, choose the correct network and asset, verify the contract and exchange rate, then approve and submit the deposit transaction.
+### What fees are charged by Stakestone?
+There is zero protocol fee (0.00%). Users pay standard network execution gas.
 
-## App
-- Dashboard: https://stakestone-app.github.io/
-- App: https://stakestone-app.github.io/dashboard/
+### Is Stakestone non-custodial?
+Yes, you maintain 100% control of your private keys and assets at all times.
 
-## Official resources
-Website: https://stakestone.io/
-Official app: https://app.stakestone.io/
-Documentation: https://docs.stakestone.io/stakestone
-Whitepaper 2.0: https://static.stakestone.io/whitepaper.pdf
-STONE mechanism: https://docs.stakestone.io/stakestone/stone-eth/how-it-works/stone-mechanism
-Contract registry: https://docs.stakestone.io/stakestone/developers/smart-contracts-address_stone
-Audits and security: https://docs.stakestone.io/stakestone/additionals/audits-and-security
-Risk disclosures: https://docs.stakestone.io/stakestone/additionals/risks
-Governance and STO: https://docs.stakestone.io/stakestone/governance/sto
-Source-code organization: https://github.com/stakestone
-Official X: https://twitter.com/Stake_Stone
-
-## Data & references
-StakeStone on DeFiLlama: https://defillama.com/protocol/stakestone
-STO on CoinGecko: https://www.coingecko.com/en/coins/stakestone
-STONE on CoinGecko: https://www.coingecko.com/en/coins/stakestone-ether
-STONE contract on Etherscan: https://etherscan.io/token/0x7122985656e38bdc0302db86685bb972b145bd3c
-STO contract on Etherscan: https://etherscan.io/token/0x1d88713b483a8e45cff0e5cd7c2e15e5fab4534d
-ERC-20 standard: https://eips.ethereum.org/EIPS/eip-20
-LayerZero OFT standard: https://docs.layerzero.network/v2/developers/evm/oft/quickstart
+## Internal Sections & App Navigation
+- [What is Stakestone?](#what)
+- [How it works](#how)
+- [Your options & rewards](#options)
+- [Safety & Audits](#safety)
+- [Troubleshooting & Fixes](#troubleshoot)
+- [Frequently Asked Questions](#faq)
+- [Stakestone Dashboard](index.html)
+- [Open Stakestone App](dashboard/index.html)

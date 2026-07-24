@@ -1,0 +1,19 @@
+{
+  "name": "StakeStone",
+  "short_name": "StakeStone",
+  "description": "StakeStone routes deposits into yield strategies and issues tokens like STONE whose redemption value accrues yield. How it works, rewards, risks, and withdrawals.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "en",
+  "background_color": "#f5f6f8",
+  "theme_color": "#f5f6f8",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
