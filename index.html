@@ -1,640 +1,297 @@
-<!DOCTYPE html>
-
+﻿<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>StakeStone — Dashboard</title>
-<meta content="StakeStone routes deposits into yield strategies and issues tokens like STONE whose redemption value accrues yield. How it works, rewards, risks, and withdrawals." name="description"/>
-<meta content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" name="robots"/>
-<meta content="#f5f6f8" name="theme-color"/>
-<link href="https://stakestone-app.github.io/" rel="canonical"/>
-<link href="stone.png" rel="icon" type="image/png"/>
-<link href="stone.png" rel="apple-touch-icon"/>
-<link href="manifest.webmanifest" rel="manifest"/>
-<link href="og-cover.png" rel="image_src"/>
-<link crossorigin="" href="https://api.coingecko.com" rel="preconnect"/>
-<style>
-/* StakeStone — independent single-page hub. */
-:root {
-  color-scheme: light;
-  --bg: #f5f6f8; --surface: #ffffff; --panel: #ffffff; --raised: #f1f3f6;
-  --line: rgba(17, 24, 39, 0.10); --line-2: rgba(17, 24, 39, 0.16);
-  --ink: #0e1016; --text: #464d59; --muted: #6a7280; --faint: #98a0ad;
-  --accent: #3d5de6; --accent-2: #2c45c8; --accent-soft: rgba(61, 93, 230, 0.10); --accent-glow: rgba(61, 93, 230, 0.22);
-  --cyan: #0e93a8; --cta: #3d5de6; --cta-ink: #ffffff;
-  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px;
-  --mono: ui-monospace, "SF Mono", SFMono-Regular, "Roboto Mono", Menlo, Consolas, monospace;
-  --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --ease: cubic-bezier(0.22, 0.7, 0.24, 1);
-}
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-body {
-  margin: 0; min-width: 320px;
-  color: var(--text); background: var(--bg);
-  font-family: var(--font); font-size: 15px; line-height: 1.55;
-  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-}
-a { color: inherit; text-decoration: none; }
-a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; border-radius: 8px; }
-img { display: block; max-width: 100%; }
-.skip { position: absolute; left: -999px; }
-.skip:focus { left: 12px; top: 12px; z-index: 99; padding: 8px 14px; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 750; }
-
-.shell { display: flex; min-height: 100dvh; }
-
-/* ───────── sidebar (off-canvas drawer) ───────── */
-.sidebar {
-  position: fixed; top: 0; left: 0; z-index: 70;
-  width: min(288px, 86vw); height: 100vh; height: 100dvh; overflow-y: auto;
-  display: flex; flex-direction: column; padding: 16px 12px 14px;
-  background: var(--surface); border-right: 1px solid var(--line);
-  transform: translateX(-100%); transition: transform 0.24s var(--ease);
-  box-shadow: 24px 0 70px rgba(17, 24, 39, 0.15);
-}
-.sidebar.is-open { transform: none; }
-.scrim { position: fixed; inset: 0; z-index: 65; background: rgba(17, 24, 39, 0.30); opacity: 0; pointer-events: none; transition: opacity 0.24s var(--ease); }
-.scrim.is-open { opacity: 1; pointer-events: auto; }
-html:not(.js) .sidebar { position: static; transform: none; width: 262px; height: auto; box-shadow: none; }
-html:not(.js) .scrim, html:not(.js) .nav-toggle { display: none; }
-.side-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 2px 8px 6px; }
-.brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
-.brand-logo { width: 32px; height: 32px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 9px; background: var(--raised); box-shadow: inset 0 0 0 1px var(--line-2); }
-.brand-logo img { width: 20px; height: 20px; border-radius: 6px; }
-.brand-name { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); line-height: 1; }
-.nav-label { margin: 14px 12px 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--faint); }
-.nav-item { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 9px; color: var(--text); font-size: 14px; font-weight: 600; transition: color 150ms var(--ease), background-color 150ms var(--ease); }
-.ni-ico { width: 18px; height: 18px; flex: 0 0 auto; color: var(--muted); }
-.ni-ext { margin-left: auto; color: var(--faint); font-size: 12px; }
-.nav-item:hover { color: var(--ink); background: rgba(17, 24, 39, 0.04); }
-.nav-item:hover .ni-ico { color: var(--text); }
-.nav-item.is-active { color: var(--accent-2); background: transparent; }
-.nav-item.is-active .ni-ico { color: var(--accent-2); }
-.nav-group { border-radius: 9px; }
-.nav-group summary { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 9px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; list-style: none; transition: color 150ms var(--ease), background-color 150ms var(--ease); }
-.nav-group summary::-webkit-details-marker { display: none; }
-.nav-group summary .ni-ico { color: var(--muted); }
-.nav-group summary .chev { width: 15px; height: 15px; margin-left: auto; color: var(--faint); transition: transform 200ms var(--ease); }
-.nav-group summary:hover { color: var(--ink); background: rgba(17, 24, 39, 0.04); }
-.nav-group[open] summary { color: var(--ink); }
-.nav-group[open] summary .ni-ico { color: var(--text); }
-.nav-group[open] summary .chev { transform: rotate(180deg); }
-@media (prefers-reduced-motion: reduce) { .nav-group summary .chev { transition: none; } }
-.nav-sub { display: flex; flex-direction: column; gap: 1px; padding: 2px 0 8px 42px; }
-.nav-sub a { display: flex; align-items: baseline; gap: 7px; padding: 6px 10px; border-radius: 8px; color: var(--muted); font-size: 12.5px; font-weight: 550; transition: color 150ms var(--ease), background-color 150ms var(--ease); }
-.nav-sub a small { color: var(--faint); font-size: 10.5px; font-weight: 500; }
-.nav-sub a:hover { color: var(--accent-2); background: rgba(17, 24, 39, 0.04); }
-.nav-sub a:hover small { color: var(--muted); }
-.sidebar-foot { margin-top: auto; padding-top: 13px; border-top: 1px solid var(--line); }
-.disclose { margin: 8px 10px 0; font-size: 11px; line-height: 1.5; color: var(--muted); }
-.disclose strong { color: var(--text); font-weight: 700; }
-.fine { margin: 6px 10px 0; font-size: 10.5px; line-height: 1.45; color: var(--faint); }
-.nav-toggle { display: inline-flex; width: 38px; height: 38px; flex: 0 0 auto; position: relative; padding: 0; border: 1px solid var(--line-2); border-radius: 10px; background: var(--raised); color: var(--ink); cursor: pointer; }
-.nav-toggle .bar { position: absolute; left: 10px; right: 10px; height: 2px; border-radius: 2px; background: currentColor; transition: transform 0.22s var(--ease), opacity 0.18s var(--ease); }
-.nav-toggle .bar:nth-child(1) { top: 13px; } .nav-toggle .bar:nth-child(2) { top: 18px; } .nav-toggle .bar:nth-child(3) { top: 23px; }
-.sidebar.is-open .nav-toggle .bar:nth-child(1) { transform: translateY(5px) rotate(45deg); }
-.sidebar.is-open .nav-toggle .bar:nth-child(2) { opacity: 0; }
-.sidebar.is-open .nav-toggle .bar:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
-
-/* persistent header: hamburger + logo + H1 */
-.topbar-left { display: flex; align-items: center; gap: 12px 14px; min-width: 0; flex-wrap: wrap; }
-.menu-btn { display: inline-flex; flex-direction: column; justify-content: center; gap: 4px; width: 40px; height: 38px; flex: 0 0 auto; padding: 0 9px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--raised); color: var(--ink); cursor: pointer; }
-.menu-btn .bar { display: block; height: 2px; width: 100%; border-radius: 2px; background: currentColor; transition: transform 0.22s var(--ease), opacity 0.18s var(--ease); }
-.menu-btn:hover { border-color: var(--accent); color: var(--accent-2); }
-.shell.nav-open .menu-btn .bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
-.shell.nav-open .menu-btn .bar:nth-child(2) { opacity: 0; }
-.shell.nav-open .menu-btn .bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
-.topbar-logo { width: 32px; height: 32px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 9px; background: var(--raised); box-shadow: inset 0 0 0 1px var(--line-2); }
-.topbar-logo img { width: 20px; height: 20px; border-radius: 6px; }
-h1.wordmark { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); line-height: 1; white-space: nowrap; }
-html:not(.js) .menu-btn { display: none; }
-
-/* ───────── main / topbar ───────── */
-.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.topbar { position: relative; z-index: 40; flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; padding: 14px 26px; border-bottom: 0; background: transparent; }
-.topbar-right { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; }
-.mode-switch { display: inline-flex; align-items: center; gap: 10px; }
-.ms-label { font-size: 13.5px; font-weight: 700; color: var(--muted); transition: color 150ms var(--ease); }
-.ms-label.is-on { color: var(--ink); }
-.ms-track { position: relative; width: 42px; height: 24px; flex: 0 0 auto; padding: 0; border: 1px solid var(--line-2); border-radius: 999px; background: var(--raised); cursor: pointer; transition: background-color 180ms var(--ease); }
-.ms-knob { position: absolute; top: 50%; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); transform: translateY(-50%); transition: left 200ms var(--ease); }
-.ms-track[aria-checked="true"] { background: var(--accent-soft); border-color: rgba(61, 93, 230, 0.4); }
-.ms-track[aria-checked="true"] .ms-knob { left: 23px; background: var(--accent-2); }
-.ticker { display: flex; align-items: center; flex-wrap: wrap; gap: 3px 16px; min-width: 0; }
-.tick { display: inline-flex; align-items: baseline; gap: 6px; color: var(--faint); font-size: 11px; font-weight: 550; letter-spacing: 0.01em; transition: color 150ms var(--ease); }
-.tick b { color: var(--muted); font-family: var(--mono); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.tick .ext { color: var(--faint); font-size: 9.5px; transition: color 150ms var(--ease); }
-.tick:hover { color: var(--muted); } .tick:hover b, .tick:hover .ext { color: var(--accent-2); }
-.btn-open { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border: 1px solid var(--line-2); border-radius: 10px; color: var(--ink); background: rgba(17, 24, 39, 0.04); font-size: 12.5px; font-weight: 700; white-space: nowrap; transition: border-color 150ms var(--ease), background-color 150ms var(--ease); }
-.btn-open:hover { border-color: var(--accent); color: var(--accent-2); }
-
-/* ───────── first screen: hero + swap card ───────── */
-.stage { position: relative; min-height: calc(100dvh - 56px); width: min(560px, 100%); margin-inline: auto; padding: clamp(16px, 3vh, 40px) 24px clamp(52px, 9vh, 96px); display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: clamp(14px, 3vh, 26px); }
-.hero { text-align: center; margin: 0; }
-.hero-h2 { margin: 0; font-size: clamp(1.5rem, 3.6vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--ink); }
-@supports ((-webkit-background-clip: text) or (background-clip: text)) { .hero-h2 { background: linear-gradient(180deg, #0e1016, #3a4c85); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; } }
-.hero-sub { margin: 10px auto 0; max-width: 48ch; font-size: 13.5px; line-height: 1.55; color: var(--text); }
-.hero-sub strong { color: var(--ink); font-weight: 700; }
-.swap-card { border: 1px solid var(--line-2); border-radius: var(--r-xl); background: var(--panel); padding: 16px; }
-.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 2px; }
-.card-title { margin: 0; font-size: 11.5px; font-weight: 750; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
-.preview-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--accent-2); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-.preview-tag > span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.leg { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 15px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--raised); }
-.asset { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; border: 1px solid var(--line-2); border-radius: 999px; background: rgba(17, 24, 39, 0.04); color: var(--ink); font-size: 14px; font-weight: 700; }
-.asset .tok { width: 26px; height: 26px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #fff; }
-.asset .tok img { width: 26px; height: 26px; }
-.asset .chev-sm { width: 15px; height: 15px; color: var(--muted); }
-.leg-amt { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; min-width: 0; }
-.leg-amt .amount { font-family: var(--mono); font-size: 1.7rem; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1; }
-.leg-amt .leg-sub { font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); }
-.swap-arrow { position: relative; z-index: 1; display: grid; place-items: center; width: 40px; height: 40px; margin: -12px auto; border: 3px solid var(--panel); border-radius: 12px; background: var(--raised); color: var(--accent-2); cursor: pointer; box-shadow: 0 0 0 1px var(--line-2); transition: transform 220ms var(--ease), color 150ms var(--ease); }
-.swap-arrow svg { width: 17px; height: 17px; }
-.swap-arrow:hover { color: #fff; transform: rotate(180deg); }
-.route-panel { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding: 13px 15px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--raised); }
-.route-info b { display: block; color: var(--ink); font-size: 13.5px; font-weight: 700; letter-spacing: 0.01em; }
-.route-info span { display: block; margin-top: 2px; color: var(--faint); font-size: 11.5px; }
-.route-tok { display: inline-flex; align-items: center; gap: 7px; color: var(--text); font-size: 13px; font-weight: 650; white-space: nowrap; }
-.route-tok .tok { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; background: #fff; display: grid; place-items: center; }
-.route-tok .tok img { width: 20px; height: 20px; }
-.route-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 4px 2px; border-top: 1px solid var(--line); margin-top: 10px; }
-.route-row span { font-size: 10.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); }
-.route-row b { color: var(--text); font-size: 12.5px; font-weight: 650; font-variant-numeric: tabular-nums; }
-.swap-cta { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; padding: 15px; border-radius: var(--r-md); color: var(--cta-ink); background: var(--cta); font-size: 15px; font-weight: 750; letter-spacing: 0.01em; transition: filter 150ms var(--ease), transform 150ms var(--ease); }
-.swap-cta:hover { filter: brightness(1.04); transform: translateY(-1px); }
-/* scroll cue at the foot of the first screen */
-.scroll-cue { position: absolute; left: 0; right: 0; bottom: 10px; display: flex; justify-content: center; }
-.scroll-cue a { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; color: var(--faint); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
-.scroll-cue a:hover { color: var(--accent-2); }
-.scroll-cue svg { width: 16px; height: 16px; animation: cue 1.8s var(--ease) infinite; }
-@keyframes cue { 0%,100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
-@media (prefers-reduced-motion: reduce) { .scroll-cue svg { animation: none; } }
-
-/* ───────── merged content (all in initial HTML; revealed on scroll) ───────── */
-.content { width: min(760px, 100%); margin: 0 auto; padding: clamp(56px, 12vh, 140px) 24px 88px; }
-.content .lead-in { padding: clamp(4px, 1vh, 12px) 0 clamp(10px, 2.5vh, 22px); }
-.content .lead-in > p { margin: 0 0 16px; font-size: 15px; line-height: 1.66; color: var(--text); }
-.content .lead-in > p strong { color: var(--ink); font-weight: 700; }
-/* premium feature card (modern-site feel) */
-.content .lead-in .feat{position:relative;width:min(1120px,calc(100vw - 44px));margin-left:50%;transform:translateX(-50%);display:grid;grid-template-columns:1.08fr .92fr;align-items:stretch;background:linear-gradient(165deg,#141824,#0b0e15);border:1px solid rgba(255,255,255,.09);border-radius:28px;overflow:hidden;box-shadow:0 52px 120px -55px rgba(0,0,0,.82)}
-.feat-l{padding:clamp(32px,4vw,64px);display:flex;flex-direction:column;justify-content:center}
-.feat-l h2{margin:0;font-size:clamp(2.2rem,4.6vw,3.2rem);line-height:1.03;font-weight:800;letter-spacing:-.03em;color:#fff}
-.feat-lead{margin:20px 0 0;font-size:17px;line-height:1.6;color:rgba(255,255,255,.9);max-width:48ch}
-.content .lead-in .feat-lead a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.55);text-underline-offset:3px}
-.content .lead-in .feat-lead a:hover{text-decoration-color:#fff}
-.feat-cta{margin:32px 0 0}
-.content .lead-in .feat-btn{display:inline-flex;align-items:center;gap:10px;padding:17px 38px;border-radius:999px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 50%,#7c4dff));color:#fff;font-weight:750;font-size:16.5px;text-decoration:none;box-shadow:0 20px 44px -12px var(--accent-glow);transition:transform .16s var(--ease),box-shadow .16s var(--ease)}
-.content .lead-in .feat-btn:hover{transform:translateY(-2px);box-shadow:0 26px 56px -14px var(--accent-glow)}
-.feat-btn .arr{transition:transform .18s var(--ease)}
-.content .lead-in .feat-btn:hover .arr{transform:translateX(3px)}
-.feat-more{margin:18px 0 0}
-.feat-readmore{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:rgba(255,255,255,.7);transition:color .15s var(--ease)}
-.feat-readmore::-webkit-details-marker{display:none}
-.feat-readmore:hover{color:#fff}
-.feat-readmore .chev{width:15px;height:15px;transition:transform .2s var(--ease)}
-.feat-more[open] .feat-readmore .chev{transform:rotate(180deg)}
-.feat-detail{margin:20px 0 0;font-size:14.5px;line-height:1.72;color:rgba(255,255,255,.82)}
-.content .lead-in .feat-detail a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.55);text-underline-offset:3px}
-.feat-more:not([open]) .feat-detail{display:none}
-.content .lead-in .feat-lead{color:rgba(255,255,255,.9)}
-.content .lead-in .feat-detail,.content .lead-in .feat-detail p{color:rgba(255,255,255,.82)}
-.feat-facts{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;margin:18px 0 2px}
-.feat-fact{padding:10px 0;border-top:1px solid rgba(255,255,255,.1)}
-.feat-fact .fl{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:0 0 3px}
-.feat-fact .fv{display:block;font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.88)}
-.feat-r{position:relative;overflow:hidden;min-height:clamp(300px,32vw,440px);background:radial-gradient(120% 105% at 70% 22%,color-mix(in srgb,var(--accent) 52%,#1a1030),#0a0d14 70%)}
-.feat-r::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:36px 36px;-webkit-mask:radial-gradient(70% 72% at 64% 36%,#000,transparent 76%);mask:radial-gradient(70% 72% at 64% 36%,#000,transparent 76%)}
-.feat-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;width:clamp(122px,16vw,166px);height:clamp(122px,16vw,166px);border-radius:34px;display:grid;place-items:center;background:linear-gradient(160deg,rgba(255,255,255,.18),rgba(255,255,255,.02));box-shadow:0 38px 84px -22px var(--accent-glow),inset 0 0 0 1px rgba(255,255,255,.18)}
-.feat-badge img{width:52%;height:52%;object-fit:contain}
-@media (max-width:860px){
-  .content .lead-in .feat{width:calc(100vw - 28px);grid-template-columns:1fr}
-  .feat-l{padding:30px 22px 32px}
-  .feat-r{min-height:200px}
-  .feat-facts{grid-template-columns:1fr}
-}
-
-.tbl.spec table { min-width: 0; }
-.tbl.spec td:first-child { color: var(--muted); font-weight: 600; white-space: nowrap; width: 1%; }
-.content .sec { border-top: 1px solid var(--line); scroll-margin-top: 66px; }
-.content .sec:first-child { border-top: 0; }
-.content .sec > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: clamp(20px, 4vh, 32px) 0; }
-.content .sec > summary::-webkit-details-marker { display: none; }
-.content .sec > summary h2 { margin: 0; font-size: clamp(1.25rem, 2.8vw, 1.6rem); font-weight: 800; letter-spacing: -0.02em; color: var(--ink); transition: color 150ms var(--ease); }
-.content .sec > summary::after { content: "+"; flex: 0 0 auto; color: var(--accent); font-weight: 700; font-size: 1.5rem; line-height: 1; }
-.content .sec[open] > summary::after { content: "\2212"; }
-.content .sec > summary:hover h2 { color: var(--accent-2); }
-.content .sec-body { padding: 0 0 clamp(22px, 4vh, 34px); }
-.content .sec[open] .sec-body { animation: secdrop 0.22s var(--ease); }
-@keyframes secdrop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .content .sec[open] .sec-body { animation: none; } }
-.content p { margin: 0 0 13px; color: var(--text); }
-.content p strong, .content li strong { color: var(--ink); font-weight: 700; }
-.content ul, .content ol { margin: 0 0 14px; padding-left: 20px; }
-.content li { margin-bottom: 8px; color: var(--text); }
-.content li::marker { color: var(--accent); }
-/* inline source links — blend with the copy, brighten only on hover */
-.content .sec-body a, .content .qa .a a, .content .lead-in a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: rgba(17, 24, 39, 0.26); transition: color 150ms var(--ease), text-decoration-color 150ms var(--ease); }
-.content .sec-body a:hover, .content .qa .a a:hover, .content .lead-in a:hover { color: var(--accent-2); text-decoration-color: var(--accent-2); }
-.content .sec-body a.addr { text-decoration-color: rgba(134, 160, 255, 0.32); }
-.cite { margin: 4px 0 0; font-size: 12px; color: var(--faint); }
-.cite a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
-.cite a:hover { color: var(--accent-2); }
-.tbl { width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); margin: 4px 0 14px; background: var(--panel); }
-.tbl table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 460px; }
-.tbl th { text-align: left; font-weight: 700; color: var(--accent-2); background: rgba(17, 24, 39, 0.04); padding: 10px 13px; border-bottom: 1px solid var(--line-2); font-size: 11.5px; letter-spacing: 0.02em; }
-.tbl td { padding: 10px 13px; border-bottom: 1px solid var(--line); color: var(--text); vertical-align: top; }
-.tbl tr:last-child td { border-bottom: 0; }
-.tbl td:first-child { color: var(--ink); font-weight: 600; }
-.qa { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); margin: 0 0 10px; overflow: hidden; }
-.qa summary { padding: 15px 18px; color: var(--ink); font-weight: 650; cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 12px; font-size: 14.5px; }
-.qa summary::-webkit-details-marker { display: none; }
-.qa summary::after { content: "+"; color: var(--accent); font-weight: 700; font-size: 1.15rem; line-height: 1; }
-.qa[open] summary::after { content: "−"; }
-.qa[open] { border-color: var(--line-2); }
-.qa .a { padding: 0 18px 15px; color: var(--text); font-size: 13.5px; }
-.qa .a p { margin: 0 0 8px; }
-.addr { font-family: var(--mono); font-size: 12px; color: var(--accent-2); word-break: break-all; }
-.disclosure-box { margin: 24px 0 0; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); font-size: 12.5px; line-height: 1.6; color: var(--muted); }
-.disclosure-box strong { color: var(--text); }
-/* scroll-reveal — content is always present; JS only animates it in */
-html.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
-html.js .reveal.in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { html.js .reveal { opacity: 1; transform: none; transition: none; } }
-
-/* ───────── responsive ───────── */
-@media (max-width: 560px) {
-  .topbar { padding: 10px 16px; }
-  .stage { padding: 16px 16px 40px; }
-  .content { padding: clamp(40px, 9vh, 90px) 16px 72px; }
-  .ticker { display: none; }
-  .leg-amt .amount { font-size: 1.5rem; }
-}
-@media (max-height: 720px) and (min-width: 561px) {
-  .hero-h2 { font-size: clamp(1.35rem, 3.2vw, 1.9rem); }
-  .hero-sub { font-size: 13px; margin-top: 8px; }
-  .swap-card { padding: 13px; }
-  .leg { padding: 12px 14px; }
-  .leg-amt .amount { font-size: 1.45rem; }
-  .route-panel { margin-top: 9px; padding: 11px 14px; }
-  .swap-cta { margin-top: 12px; padding: 13px; }
-}
-.hero.stake-hero { text-align: center; max-width: 720px; margin: 0 auto; }
-.kicker { margin: 0 0 14px; text-transform: uppercase; letter-spacing: 0.2em; font-size: 11px; font-weight: 800; color: var(--accent); }
-.hero.stake-hero .hero-h2 { font-size: clamp(2rem, 5.2vw, 3.1rem); line-height: 1.08; }
-.hero.stake-hero .hero-sub { font-size: 15px; max-width: 54ch; margin-top: 14px; }
-.stake-gateway { margin: 36px auto 0; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-.emblem { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(120% 120% at 30% 25%, #ffffff, #e8ecfb); box-shadow: 0 24px 60px -18px rgba(61,93,230,0.55), inset 0 0 0 1px rgba(61,93,230,0.12); position: relative; }
-.emblem::after { content: ""; position: absolute; inset: -16px; border-radius: 50%; background: radial-gradient(circle, rgba(61,93,230,0.20), transparent 70%); z-index: -1; }
-.emblem img { width: 52px; height: 52px; }
-.gw-facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; }
-.gw-chip { border: 1px solid var(--line-2); border-radius: 999px; padding: 7px 15px; font-size: 12.5px; font-weight: 600; color: var(--text); background: var(--panel); }
-.stake-cta { display: inline-flex; align-items: center; gap: 10px; padding: 15px 32px; border-radius: 14px; background: var(--cta); color: var(--cta-ink); font-weight: 800; font-size: 16px; text-decoration: none; box-shadow: 0 16px 38px -10px rgba(61,93,230,0.6); transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease); }
-.stake-cta:hover { transform: translateY(-2px); box-shadow: 0 22px 48px -12px rgba(61,93,230,0.72); }
-.stake-cta .cta-ico { width: 17px; height: 17px; flex: 0 0 auto; }
-.stake-cta .cta-go { transition: transform 0.18s var(--ease); }
-.stake-cta:hover .cta-go { transform: translateX(4px); }
-.cta-note { margin: 0; font-size: 11.5px; color: var(--faint); letter-spacing: 0.02em; }
-.stage { position: relative; }
-.stage::before { content: ""; position: absolute; top: -6%; left: 50%; transform: translateX(-50%); width: min(780px, 94vw); height: 440px; background: radial-gradient(60% 60% at 50% 38%, rgba(61,93,230,0.11), transparent 72%); z-index: 0; pointer-events: none; }
-.hero, .stake-gateway, .scroll-cue { position: relative; z-index: 1; }
-.field-notes { margin: clamp(28px,5vh,52px) 0 0; padding: 20px 22px; border: 1px solid var(--line-2); border-left: 3px solid var(--accent); border-radius: var(--r-md); background: var(--panel); }
-.field-notes h2 { margin: 0 0 12px; font-size: clamp(1.15rem,2.6vw,1.4rem); font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
-.field-notes .fn-body { color: var(--text); font-size: 14px; line-height: 1.66; }
-.field-notes .fn-body strong { color: var(--ink); font-weight: 700; }
-.field-notes .fn-body ul { margin: 8px 0 0; padding-left: 20px; }
-.field-notes .fn-body li { margin-bottom: 6px; }
-.content .sec { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); margin: 0 0 14px; scroll-margin-top: 80px; box-shadow: 0 1px 3px rgba(17,24,39,0.05); transition: box-shadow .24s var(--ease), border-color .24s var(--ease), transform .24s var(--ease); }
-.content .sec:hover { border-color: var(--line-2); box-shadow: 0 14px 34px -16px rgba(17,24,39,0.18); }
-.content .sec[open] { border-color: rgba(61,93,230,0.30); box-shadow: 0 18px 46px -18px rgba(61,93,230,0.24); }
-.content .sec > summary { padding: clamp(17px,2.6vh,24px) clamp(18px,3vw,26px); gap: 18px; border-radius: 16px; }
-.content .sec > summary h2 { font-size: clamp(1.12rem,2.5vw,1.4rem); }
-.content .sec > summary::after { content: ""; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--raised) no-repeat center; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="%233d5de6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'); transition: transform .28s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease); }
-.content .sec:hover > summary::after { border-color: var(--accent); }
-.content .sec[open] > summary::after { transform: rotate(180deg); background-color: var(--accent-soft); border-color: rgba(61,93,230,0.42); }
-.content .sec-body { padding: 0 clamp(18px,3vw,26px) clamp(20px,3vh,28px); }
-.content .sec-body > p:first-child, .content .sec-body > ul:first-child, .content .sec-body > ol:first-child { margin-top: 0; }
-.content #faq .qa { border-radius: 12px; margin: 0 0 10px; transition: border-color .2s var(--ease), box-shadow .2s var(--ease); }
-.content #faq .qa:hover { box-shadow: 0 8px 22px -12px rgba(17,24,39,0.14); }
-.content #faq .qa[open] { border-color: rgba(61,93,230,0.28); }
-/* ── stake hero (premium dark band, reference-grade) ── */
-.shero { position: relative; overflow: hidden; min-height: calc(100dvh - 48px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: clamp(48px,9vh,104px) 24px clamp(44px,7vh,84px); background: #0a0d15; color: #fff; border-bottom: 1px solid var(--line); }
-.shero::before { content:""; position:absolute; top:-18%; left:50%; transform:translateX(-50%); width:min(1100px,120vw); height:620px; background: radial-gradient(50% 55% at 50% 40%, var(--accent-glow), transparent 70%); opacity:.95; pointer-events:none; }
-.shero::after { content:""; position:absolute; inset:0; background-image: linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px,transparent 1px); background-size: 30px 30px; -webkit-mask: radial-gradient(80% 70% at 50% 30%, #000, transparent 75%); mask: radial-gradient(80% 70% at 50% 30%, #000, transparent 75%); pointer-events:none; }
-.shero-inner { position: relative; z-index: 2; width: 100%; max-width: 900px; }
-.shero-emblem { width: 76px; height: 76px; margin: 0 auto 26px; border-radius: 22px; display: grid; place-items: center; background: linear-gradient(160deg, rgba(255,255,255,.16), rgba(255,255,255,.03)); box-shadow: 0 24px 60px -18px var(--accent-glow), inset 0 0 0 1px rgba(255,255,255,.14); }
-.shero-emblem img { width: 42px; height: 42px; }
-.shero-kicker { margin: 0 0 15px; text-transform: uppercase; letter-spacing: .22em; font-size: 11px; font-weight: 800; color: var(--accent); }
-.shero-h { margin: 0; font-size: clamp(2.1rem,5.6vw,3.5rem); line-height: 1.05; font-weight: 850; letter-spacing: -.03em; color: #fff; }
-.shero-sub { margin: 16px auto 0; max-width: 56ch; font-size: 16px; line-height: 1.6; color: rgba(255,255,255,.66); }
-.shero-sub strong { color: #fff; font-weight: 700; }
-.shero-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; justify-content: center; margin: 30px 0 0; }
-.sbtn { display: inline-flex; align-items: center; gap: 9px; padding: 14px 26px; border-radius: 13px; font-weight: 750; font-size: 15px; cursor: pointer; transition: transform .16s var(--ease), box-shadow .16s var(--ease), background-color .16s var(--ease), border-color .16s var(--ease); }
-.sbtn-primary { background: var(--accent); color: #fff; padding: 16px 34px; font-size: 16px; box-shadow: 0 16px 38px -12px var(--accent-glow); }
-.sbtn-primary:hover { transform: translateY(-2px); }
-.sbtn-primary .cta-go { transition: transform .18s var(--ease); }
-.sbtn-primary:hover .cta-go { transform: translateX(3px); }
-.sbtn-ghost { background: rgba(255,255,255,.05); color: #fff; padding: 11px 20px; font-size: 13.5px; border: 1px solid rgba(255,255,255,.17); }
-.sbtn-ghost:hover { border-color: rgba(255,255,255,.42); background: rgba(255,255,255,.09); }
-.shero-kpis { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 44px auto 0; max-width: 900px; }
-.kpi { flex: 1 1 168px; max-width: 240px; display: flex; align-items: center; gap: 9px; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 11px 14px; text-align: left; }
-.kpi svg { width: 15px; height: 15px; color: var(--accent); flex: none; }
-.kpi span { font-size: 12.5px; font-weight: 650; color: rgba(255,255,255,.84); line-height: 1.3; }
-.shero .scroll-cue { position: absolute; left: 0; right: 0; bottom: 14px; z-index: 2; }
-.shero .scroll-cue a { color: rgba(255,255,255,.5); }
-.shero .scroll-cue a:hover { color: #fff; }
-@media (max-width: 720px) {
-  .shero { min-height: 0; padding: 46px 18px 40px; }
-  .shero-kpis { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .shero .scroll-cue { display: none; }
-}
-/* docs layout (sticky TOC + open sections) */
-.docs{position:relative;width:min(1120px,calc(100vw - 44px));margin-left:50%;transform:translateX(-50%);display:grid;grid-template-columns:236px minmax(0,1fr);gap:clamp(28px,4vw,60px);margin-top:clamp(40px,6vh,72px);align-items:start}
-.toc{position:sticky;top:74px;align-self:start;max-height:calc(100dvh - 96px);overflow:auto}
-.toc-h{margin:0 0 10px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding-left:13px}
-.toc a{display:block;padding:7px 13px;border-left:2px solid var(--line);color:var(--muted);font-size:13px;font-weight:600;line-height:1.35;text-decoration:none;transition:color .15s var(--ease),border-color .15s var(--ease)}
-.toc a:hover{color:var(--ink)}
-.toc a.active{color:var(--accent-2);border-left-color:var(--accent);font-weight:750}
-.doc-main{min-width:0}
-.content .doc-sec{border:1px solid var(--line);border-radius:20px;background:var(--panel);box-shadow:0 1px 3px rgba(17,24,39,.04);margin:0 0 16px;padding:0;scroll-margin-top:82px;transition:box-shadow .26s var(--ease),border-color .26s var(--ease)}
-.content .doc-sec:first-child{border-top:1px solid var(--line)}
-.content .doc-sec:hover{border-color:var(--line-2);box-shadow:0 16px 40px -22px rgba(17,24,39,.18)}
-.content .doc-sec[open]{border-color:var(--line)}
-.content .doc-sec>summary{cursor:default;pointer-events:none;padding:clamp(20px,3vh,28px) clamp(22px,3.2vw,32px) 8px;list-style:none}
-.content .doc-sec>summary::-webkit-details-marker{display:none}
-.content .doc-sec>summary::after{display:none}
-.content .doc-sec>summary h2{font-size:clamp(1.2rem,2.3vw,1.5rem)}
-.content .doc-sec .sec-body{padding:0 clamp(22px,3.2vw,32px) clamp(22px,3.4vh,30px);max-width:74ch}
-.content .doc-sec.field-notes{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:20px;background:var(--panel);box-shadow:0 1px 3px rgba(17,24,39,.04);margin:0 0 16px;padding:clamp(22px,3vh,28px) clamp(22px,3.2vw,32px)}
-.content .doc-sec.field-notes h2{font-size:clamp(1.2rem,2.3vw,1.5rem)}
-.content .doc-sec.field-notes .fn-body{max-width:74ch}
-@media (max-width:900px){
-  .docs{grid-template-columns:1fr;width:calc(100vw - 28px);gap:0}
-  .toc{position:sticky;top:56px;z-index:20;display:flex;gap:8px;overflow-x:auto;max-height:none;background:var(--bg);padding:11px 2px;margin:0 0 6px;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
-  .toc-h{display:none}
-  .toc a{flex:0 0 auto;white-space:nowrap;border-left:0;border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:12.5px}
-  .toc a.active{color:var(--accent-2);border-color:var(--accent);background:var(--accent-soft)}
-}
-.site-foot{width:min(1120px,calc(100vw - 44px));margin:clamp(34px,5vh,60px) auto 0;padding:22px 2px clamp(30px,4vh,48px);color:var(--faint);font-size:12.5px;line-height:1.6}
-.site-foot p{margin:0 0 6px;max-width:82ch}
-.site-foot strong{color:var(--muted);font-weight:700}
-.site-foot .foot-fine{font-size:11.5px}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StakeStone — Omnichain Liquid Staking for ETH & BTC</title>
+  <meta name="description" content="Stake ETH or BTC with StakeStone and receive STONE or SBTC, omnichain yield-bearing tokens you can use across multiple chains while rewards keep accruing. Check live APY with the rewards calculator before you stake.">
+  <link rel="canonical" href="https://stakestone-app.github.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="StakeStone">
+  <meta property="og:description" content="Stake ETH or BTC with StakeStone and receive STONE or SBTC, omnichain yield-bearing tokens you can use across multiple chains while rewards keep accruing. Check live APY with the rewards calculator before you stake.">
+  <meta property="og:url" content="https://stakestone-app.github.io/">
+  <meta property="og:image" content="https://stakestone-app.github.io/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="StakeStone">
+  <meta name="twitter:description" content="Stake ETH or BTC with StakeStone and receive STONE or SBTC, omnichain yield-bearing tokens you can use across multiple chains while rewards keep accruing. Check live APY with the rewards calculator before you stake.">
+  <meta name="twitter:image" content="https://stakestone-app.github.io/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Albert+Sans:wght@500;600;700&display=swap">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "@id": "https://stakestone-app.github.io/#website", "url": "https://stakestone-app.github.io/", "name": "StakeStone — Omnichain Liquid Staking for ETH & BTC"}, {"@type": "WebPage", "@id": "https://stakestone-app.github.io/#webpage", "url": "https://stakestone-app.github.io/", "name": "StakeStone — Omnichain Liquid Staking for ETH & BTC", "isPartOf": {"@id": "https://stakestone-app.github.io/#website"}, "description": "Stake ETH or BTC with StakeStone and receive STONE or SBTC, omnichain yield-bearing tokens you can use across multiple chains while rewards keep accruing. Check live APY with the rewards calculator before you stake.", "datePublished": "2026-10-09", "dateModified": "2026-10-09"}, {"@type": "SoftwareApplication", "name": "StakeStone", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://stakestone-app.github.io/"}, {"@type": "ListItem", "position": 2, "name": "Staking"}, {"@type": "ListItem", "position": 3, "name": "StakeStone"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is StakeStone?", "acceptedAnswer": {"@type": "Answer", "text": "StakeStone is an omnichain liquid staking and liquidity protocol. You stake ETH and receive STONE, a yield-bearing token usable across multiple chains, or deposit BTC and receive SBTC, a parallel Bitcoin liquidity token."}}, {"@type": "Question", "name": "How does STONE earn yield?", "acceptedAnswer": {"@type": "Answer", "text": "StakeStone delegates deposited ETH to validators, and the resulting staking rewards compound into STONE's exchange rate over time rather than being paid out separately, so STONE's redemption value against ETH rises."}}, {"@type": "Question", "name": "What is SBTC and how is it different from STONE?", "acceptedAnswer": {"@type": "Answer", "text": "SBTC is the protocol's Bitcoin liquidity token. Since Bitcoin has no native staking, SBTC's yield comes from on-chain lending and liquidity strategies rather than validator rewards, unlike STONE's protocol-level staking yield."}}, {"@type": "Question", "name": "Can I use STONE on chains other than Ethereum?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. STONE is an omnichain token, so StakeStone supports it natively across Ethereum, Arbitrum, Mantle and other chains without needing a separate wrapped version on each one."}}, {"@type": "Question", "name": "How accurate is the StakeStone rewards calculator?", "acceptedAnswer": {"@type": "Answer", "text": "The calculator compounds your entered APY across your chosen period to project a return. Actual results move with validator performance and market conditions, so it is an estimate, not a guaranteed rate."}}, {"@type": "Question", "name": "How long does it take to redeem STONE?", "acceptedAnswer": {"@type": "Answer", "text": "Redemption runs through a queue tied to validator exit timing, so it is not instant. If you need liquidity sooner, STONE can typically be swapped on a DEX close to its redemption rate instead."}}, {"@type": "Question", "name": "Is StakeStone custodial?", "acceptedAnswer": {"@type": "Answer", "text": "No. You hold STONE or SBTC in your own wallet at all times; the protocol's contracts only hold the underlying ETH or BTC actively deployed to staking or liquidity strategies."}}]}]}</script>
+  <style>
+    :root{--bg:#FAF9FD;--surface:#FFFFFF;--text:#171427;--muted:#60596E;--accent:#7C3AED;--accent-ink:#FFFFFF;--radius:12px;--display:"Albert Sans";--body:"Albert Sans"}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:2rem}
+    body{margin:0;background:var(--bg);color:var(--text);font:400 1rem/1.7 var(--body);-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-underline-offset:.22em}
+    a:hover{text-decoration-thickness:2px}
+    :focus-visible{outline:3px solid var(--accent);outline-offset:5px}
+    ::selection{background:var(--accent);color:var(--accent-ink)}
+    h1,h2,h3,p{margin:0}
+    h1,h2,h3{font-family:var(--display);text-wrap:balance}
+    svg{display:block;flex-shrink:0}
+    img{max-width:100%;height:auto}
+    .cbeb98d{width:min(1180px,calc(100% - 64px));margin-inline:auto}
+    .c3918df{position:absolute;top:1rem;left:1rem;z-index:10;transform:translateY(-200%);padding:.7rem 1rem;background:var(--surface);border-radius:var(--radius)}
+    .c3918df:focus{transform:translateY(0)}
+    .c3a7a09{min-height:96px;display:flex;align-items:center;justify-content:space-between;gap:2rem;border-bottom:1px solid color-mix(in srgb,var(--text) 10%,transparent)}
+    .ca2094c{display:inline-flex;align-items:center;gap:.7rem;color:var(--text);font:600 1.2rem/1 var(--display);letter-spacing:-.04em;text-decoration:none}
+    .c9a1082{display:grid;place-items:center;width:38px;height:38px;background:var(--accent);color:var(--accent-ink);border-radius:var(--radius)}
+    .c06bc2d{display:flex;align-items:center;gap:1.8rem}
+    .c06bc2d>a{font-size:.88rem;font-weight:600;color:var(--text);text-decoration:none}
+    .c06bc2d>a:hover{color:var(--accent)}
+    .c06bc2d .cbf9315{padding:.65rem 1rem;border:1px solid color-mix(in srgb,var(--text) 18%,transparent);border-radius:var(--radius)}
+    .c1d4fab{padding-top:1.6rem;font-size:.8rem;color:var(--muted)}
+    .c920e8e{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;color:var(--muted)}
+    ol.c920e8e,ul.c920e8e,.c920e8e ol,.c920e8e ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.5rem}
+    .c920e8e a{color:var(--muted);text-decoration:none}
+    .c920e8e a:hover{color:var(--accent)}
+    .c920e8e [aria-current]{color:var(--text)}
+    .ceeabbb{position:relative;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);align-items:center;gap:clamp(2rem,6vw,5.5rem);padding-block:4.5rem 5.5rem}
+    .c1061d5{display:inline-flex;align-items:center;gap:.5rem;margin-bottom:1.35rem;color:var(--accent);font-size:.86rem;font-weight:600}
+    .c1061d5::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 10%,transparent)}
+    h1{font-size:clamp(2.5rem,4.8vw,4.7rem);line-height:1.06;letter-spacing:-.055em;overflow-wrap:anywhere}
+    h1 em{color:var(--accent);font-style:normal}
+    .c87c286{margin-top:1.5rem;max-width:49ch;font-size:1.06rem;line-height:1.85;color:var(--muted)}
+    .c8da07e{display:inline-flex;justify-content:center;align-items:center;gap:1.15rem;min-height:54px;padding:.9rem 1.4rem;border:1px solid color-mix(in srgb,var(--accent-ink) 12%,transparent);border-radius:var(--radius);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 88%,var(--surface)),var(--accent));box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent-ink);font:600 .95rem/1.4 var(--body);text-decoration:none;transition:transform .2s,box-shadow .2s}
+    .c8da07e:hover{transform:translateY(-2px);box-shadow:0 12px 26px color-mix(in srgb,var(--accent) 26%,transparent)}
+    .cb34a1e>.c8da07e{margin-top:2rem}
+    .c23f772{margin-top:1.1rem;color:var(--muted);font-size:.8rem}
+    .c120d23{position:relative;isolation:isolate;min-width:0;padding:1.7rem;background:var(--surface);border:1px solid color-mix(in srgb,var(--text) 10%,transparent);border-radius:calc(var(--radius) * 1.5);box-shadow:0 28px 70px -20px color-mix(in srgb,var(--text) 19%,transparent),0 3px 10px color-mix(in srgb,var(--text) 4%,transparent)}
+    .c120d23::before{content:"";position:absolute;inset:-28px;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 80% 20%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 68%);border-radius:calc(var(--radius) * 2)}
+    .ce98dd3{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.5rem}
+    .ce98dd3 h2{font-size:1.15rem;letter-spacing:-.035em}
+    .c3265b7{padding:.25rem .65rem;border-radius:var(--radius);background:color-mix(in srgb,var(--accent) 10%,var(--surface));color:var(--accent);font-size:.72rem;font-weight:600}
+    .c561fc9{display:grid;grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr);align-items:center;gap:.6rem;padding:1rem;border:1px solid color-mix(in srgb,var(--text) 9%,transparent);border-radius:var(--radius);background:color-mix(in srgb,var(--bg) 65%,var(--surface))}
+    .ce472d4{min-width:0;display:flex;align-items:center;gap:.7rem}
+    .ce472d4:last-child{justify-content:flex-end}
+    .c859428{font-size:.76rem;color:var(--muted)}
+    .ce649eb{min-width:0;display:flex;align-items:center;justify-content:center;max-width:100px;min-height:38px;overflow-wrap:anywhere}
+    .ce649eb img,.ce649eb svg{max-width:100%;max-height:38px;object-fit:contain}
+    .route-arrow{display:grid;place-items:center;width:34px;height:34px;border:1px solid color-mix(in srgb,var(--text) 10%,transparent);border-radius:50%;color:var(--accent);background:var(--surface)}
+    .cd75771{margin-top:1.5rem}
+    .c681b69{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:.55rem}
+    .c681b69 label{font-size:.85rem;font-weight:600}
+    .cc154a5{font-size:.74rem;color:var(--muted)}
+    .c4560b3{display:flex;align-items:center;gap:.8rem;padding:.85rem 1rem;border:1px solid color-mix(in srgb,var(--text) 20%,transparent);border-radius:var(--radius);background:var(--bg);transition:border-color .2s,box-shadow .2s}
+    .c4560b3:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+    .c4560b3:has([aria-invalid="true"]){border-color:var(--accent)}
+    .c4560b3 input{width:100%;min-width:0;padding:0;border:0;outline:none;background:var(--bg);color:var(--text);font:500 2rem/1.25 var(--display);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+    .c4560b3 input::placeholder{color:var(--muted)}
+    .c4560b3>span{font-size:.8rem;color:var(--muted)}
+    .c5e7d28{min-height:1.4em;margin-top:.5rem;font-size:.73rem;color:var(--muted)}
+    .cdf6e76{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-top:1.3rem}
+    .cdf6e76 .cd75771{margin-top:0}
+    .cbb500a{position:relative}
+    .cbb500a::after{content:"";position:absolute;right:.95rem;top:50%;width:.5rem;height:.5rem;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+    .c5dc13e{width:100%;padding:.85rem 2rem .85rem 1rem;border:1px solid color-mix(in srgb,var(--text) 20%,transparent);border-radius:var(--radius);background:var(--bg);color:var(--text);font:500 1.05rem/1.3 var(--display);letter-spacing:-.02em;appearance:none;-webkit-appearance:none;cursor:pointer}
+    .c5dc13e:focus-visible{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+    .c31771a{margin-top:1.3rem;padding:1.25rem;border:1px solid color-mix(in srgb,var(--accent) 17%,transparent);border-radius:var(--radius);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 10%,var(--surface)),color-mix(in srgb,var(--accent) 3%,var(--surface)))}
+    .c3f39f3{font-size:.8rem;color:var(--muted)}
+    .c67d52b{display:flex;align-items:baseline;flex-wrap:wrap;gap:.5rem;margin:.25rem 0 1rem}
+    .c67d52b output{font:600 clamp(1.8rem,3vw,2.6rem)/1.2 var(--display);letter-spacing:-.05em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+    .c67d52b span{font-size:.8rem;color:var(--muted)}
+    .c20c0e3{display:grid;gap:.5rem;margin:0;padding-top:.9rem;border-top:1px solid color-mix(in srgb,var(--accent) 14%,transparent);font-size:.82rem}
+    .c20c0e3>div{display:flex;justify-content:space-between;gap:1rem}
+    .c20c0e3 dt{color:var(--muted)}
+    .c20c0e3 dd{margin:0;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+    .c120d23>.c8da07e{width:100%;margin-top:1.2rem}
+    .c69b5c3{margin-top:1rem;font-size:.75rem;color:var(--muted)}
+    .c69b5c3 summary{cursor:pointer;width:fit-content;text-underline-offset:.2em}
+    .c69b5c3 summary:hover{color:var(--accent)}
+    .c69b5c3 p{margin-top:.55rem;line-height:1.7}
+    .cdf628c{padding:2rem 2.25rem;border:1px solid color-mix(in srgb,var(--text) 10%,transparent);border-radius:var(--radius);background:var(--surface)}
+    .cb1ca86{font:600 1.4rem/1.3 var(--display);letter-spacing:-.035em;margin-bottom:1.25rem}
+    .c68c4ae{overflow-x:auto}
+    .c9516eb{width:100%;border-collapse:collapse;text-align:left;font-size:.9rem}
+    .c9516eb caption{text-align:left;margin-bottom:1rem;color:var(--muted)}
+    .c9516eb th,.c9516eb td{padding:1rem 1.2rem;border-bottom:1px solid color-mix(in srgb,var(--text) 8%,transparent);vertical-align:top}
+    .c9516eb th:first-child,.c9516eb td:first-child{padding-left:0}
+    .c9516eb th:last-child,.c9516eb td:last-child{padding-right:0}
+    .c9516eb th{font-weight:600;color:var(--text)}
+    .c9516eb td{color:var(--muted)}
+    .c9516eb tbody tr:last-child>*{border-bottom:0}
+    .c9516eb thead{background:color-mix(in srgb,var(--accent) 5%,var(--surface))}
+    .ce01341{max-width:820px;margin:4.5rem auto}
+    .ca166b4{margin-block:0 3rem;padding-bottom:2.75rem;border-bottom:1px solid color-mix(in srgb,var(--text) 10%,transparent)}
+    .c40cbe5{margin:0 0 1.2rem;font:600 clamp(1.65rem,3vw,2.25rem)/1.2 var(--display);letter-spacing:-.04em}
+    .c1be717{color:var(--muted);line-height:1.9;overflow-wrap:anywhere}
+    .c1be717 p+p{margin-top:1.1rem}
+    .c1be717 h3{margin:1.8rem 0 .7rem;font-size:1.25rem;line-height:1.4;color:var(--text)}
+    .c1be717 strong{color:var(--text);font-weight:600}
+    .c1be717 ul,.c1be717 ol{padding-left:1.4rem;margin-block:1.2rem}
+    .c1be717 li+li{margin-top:.55rem}
+    .c1be717 li::marker{color:var(--accent)}
+    .c1be717 blockquote{margin:1.5rem 0;padding:1rem 1.4rem;border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;background:color-mix(in srgb,var(--accent) 6%,var(--surface));color:var(--text)}
+    .cc9caff{margin-block:.8rem;border:1px solid color-mix(in srgb,var(--text) 12%,transparent);border-radius:var(--radius);background:var(--surface);overflow:hidden}
+    .c4b4529{position:relative;cursor:pointer;padding:1.2rem 3.3rem 1.2rem 1.35rem;list-style:none;font:500 1.05rem/1.5 var(--display);color:var(--text)}
+    .c4b4529::-webkit-details-marker{display:none}
+    .c4b4529::after{content:"+";position:absolute;right:1.35rem;top:1.15rem;color:var(--accent);font-size:1.3rem}
+    .cc9caff[open]>.c4b4529::after{content:"в€’"}
+    .cc9caff[open]{border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+    .c4b4529:focus-visible{outline-offset:-5px;border-radius:var(--radius)}
+    .cb13b17{padding:0 1.35rem 1.35rem;color:var(--muted);font-size:.95rem;line-height:1.85;overflow-wrap:anywhere}
+    .cb13b17 p+p{margin-top:.8rem}
+    .cf75545{padding:2rem 2.25rem;border-radius:var(--radius);background:color-mix(in srgb,var(--surface) 75%,var(--bg));border:1px solid color-mix(in srgb,var(--text) 8%,transparent)}
+    .c664e2c{margin:0;padding-left:1.2rem;color:var(--muted);font-size:.86rem}
+    .c85ef67{padding:.35rem 0 .35rem .3rem;overflow-wrap:anywhere}
+    .c85ef67::marker{color:var(--muted)}
+    .c85ef67 a{color:var(--text);text-decoration-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+    .c85ef67 a:hover{color:var(--accent)}
+    .ccdaaec{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-top:3rem;padding-block:1.7rem 2rem;border-top:1px solid color-mix(in srgb,var(--text) 10%,transparent);color:var(--muted);font-size:.78rem}
+    .cee2e93{font:600 .95rem/1.4 var(--display);color:var(--text)}
+    @media(min-width:1400px){.ceeabbb{padding-block:5.5rem 6.5rem}}
+    @media(max-width:900px){.ceeabbb{gap:2rem;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.c120d23{padding:1.25rem}.c561fc9{padding:.8rem}.ce472d4{flex-direction:column;gap:.25rem}.ce472d4:last-child{flex-direction:column-reverse}h1{font-size:clamp(2.5rem,5.5vw,4rem)}}
+    @media(max-width:720px){.cbeb98d{width:calc(100% - 40px)}.c3a7a09{min-height:78px;gap:1rem}.c06bc2d{gap:1rem}.c06bc2d>.c8628d8{display:none}.ceeabbb{grid-template-columns:minmax(0,1fr);padding-block:2.75rem 3rem;gap:2.5rem}.cb34a1e{max-width:560px}h1{font-size:clamp(2.6rem,9vw,4rem)}.c87c286{font-size:1rem}.c120d23{width:100%;max-width:520px;justify-self:center;padding:1.5rem}.ce472d4,.ce472d4:last-child{flex-direction:row}.cdf628c,.cf75545{padding:1.5rem}.ce01341{margin-block:3rem}.c9516eb th,.c9516eb td{padding:.85rem .75rem}.ca166b4{margin-bottom:2rem;padding-bottom:2rem}.ccdaaec{margin-top:2rem}}
+    @media(max-width:380px){.cbeb98d{width:calc(100% - 28px)}.c120d23{padding:1rem}.ca2094c{font-size:1.05rem}.c06bc2d .cbf9315{padding:.55rem .7rem}.ce472d4,.ce472d4:last-child{flex-direction:column}.ce472d4:last-child{flex-direction:column-reverse}.cdf628c,.cf75545{padding:1.1rem}.c20c0e3{font-size:.76rem}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
   </style>
-<meta content="website" property="og:type"/><meta content="https://stakestone-app.github.io/" property="og:url"/>
-<meta content="StakeStone — Dashboard" property="og:title"/>
-<meta content="StakeStone routes deposits into yield strategies and issues tokens like STONE whose redemption value accrues yield. How it works, rewards, risks, and withdrawals." property="og:description"/>
-<meta content="StakeStone" property="og:site_name"/><meta content="https://stakestone-app.github.io/og-cover.png" property="og:image"/>
-<meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="StakeStone — independent staking dashboard" property="og:image:alt"/>
-<meta content="summary_large_image" name="twitter:card"/><meta content="StakeStone — Dashboard" name="twitter:title"/>
-<meta content="StakeStone routes deposits into yield strategies and issues tokens like STONE whose redemption value accrues yield. How it works, rewards, risks, and withdrawals." name="twitter:description"/><meta content="https://stakestone-app.github.io/og-cover.png" name="twitter:image"/>
-<script type="application/ld+json">
-  {"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "@id": "https://stakestone-app.github.io/#website", "url": "https://stakestone-app.github.io/", "name": "StakeStone", "inLanguage": "en"}, {"@type": "Thing", "@id": "https://stakestone-app.github.io/#brand", "name": "StakeStone", "alternateName": ["StakeStone"], "description": "StakeStone — how it works, rewards, risks, and how to stake, on an independent non-custodial dashboard.", "sameAs": ["https://docs.stakestone.io/stakestone", "https://docs.stakestone.io/stakestone/stone-eth/how-it-works", "https://docs.stakestone.io/stakestone/stakestone-2.0-a-comprehensive-guide/banking-2.0-the-crypto-native-upgrade/yield-layer", "https://ethereum.org/en/staking/pools/", "https://docs.lido.fi/integrations/api/"]}, {"@type": "WebPage", "@id": "https://stakestone-app.github.io/#webpage", "url": "https://stakestone-app.github.io/", "name": "StakeStone — Dashboard", "description": "StakeStone routes deposits into yield strategies and issues tokens like STONE whose redemption value accrues yield. How it works, rewards, risks, and withdrawals.", "isPartOf": {"@id": "https://stakestone-app.github.io/#website"}, "about": {"@id": "https://stakestone-app.github.io/#brand"}, "mainEntity": {"@id": "https://stakestone-app.github.io/#brand"}, "inLanguage": "en", "dateModified": "2026-07-21"}, {"@type": "FAQPage", "@id": "https://stakestone-app.github.io/#faq", "mainEntity": [{"@type": "Question", "name": "Is StakeStone safe?", "acceptedAnswer": {"@type": "Answer", "text": "StakeStone publishes audits and contract addresses, which is the baseline you should demand — but audits do not eliminate smart-contract or strategy risk, and the BTC and stablecoin products add custodian and exchange exposure on top. No staking product is risk-free; size your position accordingly and verify contract addresses yourself."}}, {"@type": "Question", "name": "How are rewards / APY determined?", "acceptedAnswer": {"@type": "Answer", "text": "Rewards come from the staking and restaking strategies the vault allocates to, and they accrue into STONE's redemption value rather than paying out separately. The rate is variable — it moves with strategy performance and OPAP allocation decisions, so check the current rate shown in the official app rather than trusting any quoted figure."}}, {"@type": "Question", "name": "How much do I need to start?", "acceptedAnswer": {"@type": "Answer", "text": "There is no 32 ETH validator requirement here — pooled products like this accept smaller deposits, limited in practice by gas costs on Ethereum mainnet. Check the app for any product-specific minimums before funding your wallet."}}, {"@type": "Question", "name": "How do I unstake and how long does it take?", "acceptedAnswer": {"@type": "Answer", "text": "You redeem STONE through the protocol: the token is burned and ETH is released immediately if buffer liquidity is available, otherwise after unstaking completes and the next settlement cycle runs. Alternatively you can sell STONE on a secondary market at any time, accepting the market price rather than the protocol exchange rate."}}, {"@type": "Question", "name": "What are the main options?", "acceptedAnswer": {"@type": "Answer", "text": "STONE for ETH is the fully on-chain route; STONEBTC and STONEUSD offer BTC and stablecoin yield but can involve custodians, centralized venues and KYC. You can review live protocol metrics on the DeFiLlama dashboard before choosing a route."}}, {"@type": "Question", "name": "Is this the official StakeStone site?", "acceptedAnswer": {"@type": "Answer", "text": "No. This is an independent reference dashboard — it never takes custody, requests seed phrases or executes transactions. Always confirm current terms, rates and contract addresses in the official documentation and app before depositing."}}]}]}
-  </script>
-<link href="dashboard/index.html" rel="prefetch"/><link href="dashboard/index.html" rel="prerender"/></head>
+</head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
-<div class="shell">
-<main class="main" id="main">
-<header class="topbar">
-<div class="topbar-left">
-<h1 class="wordmark">StakeStone</h1>
-</div>
-<div class="topbar-right"><div aria-label="Live metrics" class="ticker">
-<a aria-label="StakeStone" class="tick" href="https://www.coingecko.com/en/coins/stakestone" rel="noopener noreferrer" target="_blank"><span>StakeStone</span> <b id="sig-stakestone">…</b> <span aria-hidden="true" class="ext">↗</span></a>
-<a aria-label="Market cap" class="tick" href="https://coinmarketcap.com/currencies/stakestone/" rel="noopener noreferrer" target="_blank"><span>Market cap</span> <b id="sig-mc-stakestone">…</b> <span aria-hidden="true" class="ext">↗</span></a>
-<a aria-label="ETH" class="tick" href="https://defillama.com/" rel="noopener noreferrer" target="_blank"><span>ETH</span> <b id="sig-ethereum">…</b> <span aria-hidden="true" class="ext">↗</span></a>
-</div>
-</div>
-</header>
-<section class="shero" id="gateway">
-<div class="shero-inner">
-<div class="shero-emblem"><img alt="StakeStone" height="42" src="stone.png" width="42"/></div>
-<p class="shero-kicker">Omnichain liquidity protocol</p>
-<h2 class="shero-h">Omnichain Yield, One Receipt Token</h2>
-<p class="shero-sub"><strong>StakeStone</strong> is an omnichain liquidity protocol: deposit ETH, BTC or stablecoins, receive transferable yield-bearing receipt tokens, and redeem when you exit.</p>
-<div class="shero-cta">
-<a class="sbtn sbtn-primary" href="dashboard/" rel="noopener noreferrer" target="_blank">Open the staking app <span aria-hidden="true" class="cta-go">↗</span></a>
-<a class="sbtn sbtn-ghost" href="#what">Read the guide</a>
-</div>
-<div class="shero-kpis">
-<div class="kpi"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg><span>Non-rebasing STONE</span></div>
-<div class="kpi"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg><span>OPAP-governed routes</span></div>
-<div class="kpi"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg><span>Multi-chain deployments</span></div>
-</div>
-</div>
-<div class="scroll-cue"><a href="#what"><span>What is StakeStone</span><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></a></div>
-</section>
-<div class="content">
-<div class="lead-in reveal">
-<div class="feat">
-<div class="feat-l">
-<h2>Stakestone Architecture &amp; Yield Overview</h2>
-<p class="feat-lead">StakeStone takes your deposit, routes it into whitelisted yield strategies, and hands you a transferable receipt token that represents your claim on the underlying pool.</p>
-<div class="feat-cta"><a class="feat-btn" href="dashboard/" rel="noopener noreferrer" target="_blank">Enter Staking Dashboard <span aria-hidden="true" class="arr">→</span></a></div>
-<details class="feat-more">
-<summary class="feat-readmore">Read more <svg aria-hidden="true" class="chev" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></summary>
-<div class="feat-detail">
-<p>For ETH that token is STONE — a non-rebasing liquid staking asset whose balance stays fixed while its ETH-denominated exchange rate rises as yield accrues, rather than dripping extra tokens into your wallet. Allocation across staking and restaking strategies is governed on-chain through the OPAP mechanism described in the <a href="https://docs.stakestone.io/stakestone">protocol documentation</a>. This page is an independent dashboard: it never takes custody, asks for seed phrases, or executes transactions.</p>
-<div class="feat-facts">
-<div class="feat-fact"><span class="fl">Asset / network</span><span class="fv">ETH, BTC and stablecoin products; STONE deployed on Ethereum (chain ID 1) plus multiple EVM networks and Aptos</span></div>
-<div class="feat-fact"><span class="fl">How it works</span><span class="fv">Deposits enter a vault, the minter issues receipt tokens at the contract exchange rate, and vault assets are deployed into whitelisted strategy pools</span></div>
-<div class="feat-fact"><span class="fl">Rewards</span><span class="fv">Yield accrues into the token's redemption value (protocol exchange rate = pool value ÷ supply); variable and strategy-driven — no fixed rate</span></div>
-<div class="feat-fact"><span class="fl">Custody</span><span class="fv">STONE is fully on-chain; STONEUSD and STONEBTC can involve custodians, exchanges and KYC — verify each product</span></div>
-<div class="feat-fact"><span class="fl">Lock-up / exit</span><span class="fv">Redemption burns STONE and releases ETH immediately if buffer liquidity exists, otherwise after unstaking and the next settlement cycle</span></div>
-<div class="feat-fact"><span class="fl">Verify</span><span class="fv">Confirm the canonical STONE contract 0x7122985656e38BDC0302Db86685bb972b145bD3C and current exchange rate before depositing</span></div>
-</div>
-</div>
-</details>
-</div>
-<div class="feat-r"><span class="feat-badge"><img alt="StakeStone" height="72" src="stone.png" width="72"/></span></div>
-</div>
-</div>
-<div class="docs">
-<nav aria-label="On this page" class="toc">
-<p class="toc-h">On this page</p>
-<a href="#what">What is Stakestone?</a>
-<a href="#how">How it works</a>
-<a href="#ways">Your options</a>
-<a href="#rewards">Rewards and APY</a>
-<a href="#risks">Risks and lock-up</a>
-<a href="#howto">How to start</a>
-<a href="#withdraw">Unstaking and withdrawals</a>
-<a href="#faq">StakeStone FAQ</a>
-<a href="#notes">Notes before you stake</a>
-</nav>
-<div class="doc-main">
-<details class="sec reveal doc-sec" id="what" open="">
-<summary><h2>What is Stakestone?</h2></summary>
-<div class="sec-body"><p>StakeStone is an omnichain liquidity protocol that turns deposited ETH, BTC, or stablecoins into transferable, yield-bearing receipt tokens; its flagship ETH product is STONE, a liquid staking token.</p><p>The receipt token represents your claim on the underlying pool while the protocol deploys the deposit into yield strategies.</p><p>STONE is deliberately <strong>non-rebasing</strong>: your wallet balance stays fixed, while the amount of ETH each STONE can be redeemed for increases as the underlying strategies earn.</p><p>STONE is an ERC-20, using the interfaces defined by the <a href="https://eips.ethereum.org/EIPS/eip-20" rel="noopener noreferrer" target="_blank">ERC-20 token standard</a>, and a LayerZero Omnichain Fungible Token; the <a href="https://docs.layerzero.network/v2/developers/evm/oft/quickstart" rel="noopener noreferrer" target="_blank">OFT standard</a> describes how fungible tokens can exist across chains with a unified supply. The same asset moves across supported networks. The canonical Ethereum <a href="https://eth.blockscout.com/token/0x7122985656e38BDC0302Db86685bb972b145bD3C" rel="noopener noreferrer" target="_blank">contract address</a> is 0x7122985656e38BDC0302Db86685bb972b145bD3C.</p></div>
-</details>
-<details class="sec reveal doc-sec" id="how" open="">
-<summary><h2>How it works</h2></summary>
-<div class="sec-body"><p>StakeStone works by issuing STONE at a contract-defined exchange rate, then allocating deposited ETH across whitelisted Strategy Pools through OPAP governance.</p><p>The transaction sequence is connect a wallet, select a product, review the exchange rate, approve, and deposit. For STONE, ETH enters the StakeStone Vault and the Minter contract issues STONE; OPAP can add or reweight staking and restaking routes.</p><p>Those staking routes participate in <a href="https://en.wikipedia.org/wiki/Proof-of-stake" rel="noopener noreferrer" target="_blank">proof-of-stake consensus</a>; the allocation policy can change through governance instead of staying fixed to one operator set.</p><p>Yield appears as redemption value per STONE, calculated as underlying pool value divided by token supply. That protocol exchange rate is separate from a DEX price. Governance is handled by STO, the ERC-20 utility token; locking STO produces vote-escrowed veSTO.</p></div>
-</details>
-<details class="sec reveal doc-sec" id="ways" open="">
-<summary><h2>Your options</h2></summary>
-<div class="sec-body"><p>StakeStone offers three routes with different custody profiles: STONE for ETH, STONEBTC for BTC, and STONEUSD for stablecoins.</p><ul><li><strong>STONE (ETH)</strong> is the fully on-chain route: contracts, vault, strategy pools, and on-chain governance.</li><li><strong>STONEBTC</strong> provides yield on BTC and may involve custodians and centralized venues alongside contracts.</li><li><strong>STONEUSD</strong> provides stablecoin yield and may involve off-chain execution, exchanges, and KYC.</li></ul><p>The protocol name is shared, but the custody model is not: STONE is the fully on-chain route described here, while the other two can include off-chain parties.</p></div>
-</details>
-<details class="sec reveal doc-sec" id="rewards" open="">
-<summary><h2>Rewards and APY</h2></summary>
-<div class="sec-body"><p>STONE rewards accrue through its redemption value rather than through separate payouts.</p><p>The value comes from yield generated by underlying staking and restaking strategy pools; the displayed rate is variable because strategy performance, validator performance, restaking conditions, and OPAP allocation decisions can change.</p><p>The practical measure is the current exchange rate and any rate shown in the official app at deposit; a quoted APY is a snapshot for a strategy-governed pool, not a fixed rate. For context, <a href="https://ethereum.org/en/staking/pools/" rel="noopener noreferrer" target="_blank">pooled staking overview</a> explains how pooled staking routes ETH through a shared service rather than a solo validator.</p></div>
-</details>
-<details class="sec reveal doc-sec" id="risks" open="">
-<summary><h2>Risks and lock-up</h2></summary>
-<div class="sec-body"><p>StakeStone's material risks are smart-contract, strategy and restaking, exit-liquidity, market, counterparty, and key risks.</p><ul><li><strong>Smart-contract risk:</strong> published audits cover protocol products and contracts, but a vault or strategy-pool exploit remains a loss scenario.</li><li><strong>Strategy and restaking risk:</strong> STONE can allocate across approved staking and restaking routes, and restaking adds slashing conditions on top of base staking.</li><li><strong>Exit-liquidity risk:</strong> instant redemption depends on buffer liquidity; a short buffer means waiting for unstaking and the next settlement cycle.</li><li><strong>Market risk:</strong> a DEX sale can be below the protocol exchange rate, and the underlying asset price can fall further than accrued yield covers.</li><li><strong>Custody and counterparty risk:</strong> STONEBTC and STONEUSD can add custodians, exchanges, centralized venues, and KYC-gated processes.</li><li><strong>Key risk:</strong> self-custody makes key management your responsibility; a support desk cannot recover lost keys.</li></ul></div>
-</details>
-<details class="sec reveal doc-sec" id="howto" open="">
-<summary><h2>How to start</h2></summary>
-<div class="sec-body"><p>To start, select the product, verify the route and contract, then approve and confirm a deposit.</p><ol><li><strong>Select the product and wallet.</strong> Use STONE for on-chain ETH, STONEBTC for BTC, or STONEUSD for stablecoins, then connect a wallet you control.</li><li><strong>Review the transaction.</strong> Navigate to the official app, confirm the canonical Ethereum STONE contract is 0x7122985656e38BDC0302Db86685bb972b145bD3C, and read the displayed exchange rate before approving.</li><li><strong>Deposit and record the baseline.</strong> Approve the token transaction, deposit, confirm that STONE arrived, and note the exchange rate at entry for later accrual tracking.</li></ol></div>
-</details>
-<details class="sec reveal doc-sec" id="withdraw" open="">
-<summary><h2>Unstaking and withdrawals</h2></summary>
-<div class="sec-body"><p>You can exit STONE either through protocol redemption or by selling it on a secondary market.</p><p>Protocol redemption burns STONE and returns ETH at the contract exchange rate: immediately when the vault has buffer liquidity, or after unstaking completes and the next settlement cycle runs when it does not.</p><p>A secondary-market sale lets you swap STONE at the market price rather than the protocol exchange rate. The phrase liquid staking token describes the transferable receipt, not an unconditional instant redemption path.</p></div>
-</details>
-<details class="sec reveal doc-sec" id="faq" open="">
-<summary><h2>StakeStone FAQ</h2></summary>
-<div class="sec-body">
-<details class="qa"><summary>Is StakeStone safe?</summary><div class="a"><p>StakeStone has product-specific exposure: STONE is fully on-chain, while STONEBTC and STONEUSD can involve custodians and centralized venues; the dedicated risk section lists the remaining smart-contract, strategy, and exit risks.</p></div></details>
-<details class="qa"><summary>How are rewards / APY determined?</summary><div class="a"><p>Rewards come from the staking and restaking strategies selected by the vault and accrue into STONE's redemption value. The rate is variable because strategy performance and OPAP allocation decisions can change.</p></div></details>
-<details class="qa"><summary>How much do I need to start?</summary><div class="a"><p>There is no 32 ETH validator requirement here: pooled products like this accept smaller deposits, with gas costs on Ethereum mainnet limiting the practical minimum. Check the app for any product-specific minimums.</p></div></details>
-<details class="qa"><summary>How do I unstake and how long does it take?</summary><div class="a"><p>Protocol redemption burns STONE and releases ETH immediately when buffer liquidity is available, otherwise after unstaking completes and the next settlement cycle runs. A secondary-market sale uses the market price instead of the protocol exchange rate.</p></div></details>
-<details class="qa"><summary>What are the main options?</summary><div class="a"><p>STONE for ETH is the fully on-chain route; STONEBTC and STONEUSD offer BTC and stablecoin yield but can involve custodians, centralized venues, and KYC.</p></div></details>
-<details class="qa"><summary>Is this the official StakeStone site?</summary><div class="a"><p>No. This is an independent reference dashboard; it never takes custody, requests seed phrases, or executes transactions. The official documentation and app contain the current terms, rates, and contract addresses.</p></div></details>
-</div>
-</details>
-<section class="field-notes reveal doc-sec" id="notes">
-<h2>Notes before you stake</h2>
-<div class="fn-body"><p><strong>Match the route to the custody model.</strong> STONE is fully on-chain; STONEBTC and STONEUSD can involve custodians, exchanges, and KYC.</p><p><strong>Track two exit values.</strong> Protocol redemption burns STONE and returns ETH at the contract exchange rate; a secondary-market sale uses the market price.</p><p>The canonical Ethereum STONE contract is 0x7122985656e38BDC0302Db86685bb972b145bD3C, and the current exchange rate is shown in the official app.</p><p>Contract addresses and mechanics above were checked against official documentation and on-chain data, last reviewed 21 July 2026.</p><p><em>Independent reference - confirm terms in the official app before staking.</em></p></div>
-</section>
-</div>
-</div>
-</div>
-<footer class="site-foot"><div class="wrap">Stakestone Guide &amp; Technical Reference · <a href="dashboard/" rel="noopener noreferrer" target="_blank">Open Stakestone App ↗</a> · © 2026</div></footer>
-</main>
-</div>
-<script>
-/* StakeStone: premium hero, mobile nav, scroll-reveal. */
-(function () {
-  "use strict";
-  document.documentElement.classList.add("js");
-  var $ = function (id) { return document.getElementById(id); };
-  function money(n) {
-    if (n >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
-    if (n >= 1e6) return "$" + (n / 1e6).toFixed(2) + "M";
-    if (n >= 1e3) return "$" + (n / 1e3).toFixed(0) + "K";
-    return "$" + n.toFixed(0);
-  }
-  function grab(url) {
-    var controller = "AbortController" in window ? new AbortController() : null;
-    var timer = controller ? setTimeout(function () { controller.abort(); }, 6500) : null;
-    return fetch(url, controller ? { signal: controller.signal } : undefined)
-      .then(function (response) { if (!response.ok) throw new Error("HTTP " + response.status); return response.json(); })
-      .finally(function () { if (timer) clearTimeout(timer); });
-  }
-  var SIGNALS = [{"t": "price", "id": "sig-stakestone", "cg": "stakestone", "chg": true, "label": "StakeStone", "link": "https://www.coingecko.com/en/coins/stakestone"}, {"t": "mcap", "id": "sig-mc-stakestone", "cg": "stakestone", "label": "Market cap", "link": "https://www.coingecko.com/en/coins/stakestone"}, {"t": "price", "id": "sig-ethereum", "cg": "ethereum", "label": "ETH", "link": "https://www.coingecko.com/en/coins/ethereum"}];
-  (function(){
-    var S = SIGNALS; if(!S||!S.length) return;
-    function el(id){return document.getElementById(id);}
-    function hide(id){var e=el(id);if(e){var t=e.closest(".tick");if(t)t.style.display="none";}}
-    function set(id,x){var e=el(id);if(e)e.textContent=x;}
-    function usd(n){n=Number(n);return "$"+n.toLocaleString("en-US",{maximumFractionDigits:n<1?4:0});}
-    function big(n){n=Number(n);if(n>=1e9)return "$"+(n/1e9).toFixed(2)+"B";if(n>=1e6)return "$"+(n/1e6).toFixed(1)+"M";if(n>=1e3)return "$"+(n/1e3).toFixed(1)+"K";return "$"+Math.round(n);}
-    function jf(u){return fetch(u).then(function(r){if(!r.ok)throw 0;return r.json();});}
-    var coins = S.filter(function(s){return s.t==="price"||s.t==="mcap";});
-    if(coins.length){
-      var ids=coins.map(function(s){return s.cg;}).filter(function(v,i,a){return a.indexOf(v)===i;}).join(",");
-      jf("https://api.coingecko.com/api/v3/simple/price?ids="+ids+"&vs_currencies=usd&include_24hr_change=true&include_market_cap=true")
-        .then(function(v){coins.forEach(function(s){var d=v[s.cg];if(!d){hide(s.id);return;}
-          if(s.t==="mcap"){isFinite(d.usd_market_cap)&&d.usd_market_cap>0?set(s.id,big(d.usd_market_cap)):hide(s.id);return;}
-          if(isFinite(d.usd)){var x=usd(d.usd);if(s.chg&&isFinite(d.usd_24h_change)){var c=d.usd_24h_change;x+=" "+(c>=0?"▲":"▼")+Math.abs(c).toFixed(1)+"%";}set(s.id,x);}else hide(s.id);});})
-        .catch(function(){coins.forEach(function(s){hide(s.id);});});
-    }
-    S.forEach(function(s){
-      if(s.t==="tvl") jf("https://api.llama.fi/tvl/"+s.sl).then(function(v){var n=Number(v);isFinite(n)&&n>0?set(s.id,big(n)):hide(s.id);}).catch(function(){hide(s.id);});
-      else if(s.t==="vol") jf("https://api.llama.fi/summary/dexs/"+s.sl+"?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true").then(function(v){var n=v&&Number(v.total24h);isFinite(n)&&n>0?set(s.id,big(n)):hide(s.id);}).catch(function(){hide(s.id);});
-      else if(s.t==="ctvl") jf("https://api.llama.fi/v2/chains").then(function(a){var f=(a||[]).filter(function(c){return c.name===s.ch;})[0];f&&isFinite(f.tvl)&&f.tvl>0?set(s.id,big(f.tvl)):hide(s.id);}).catch(function(){hide(s.id);});
-    });
-  })();
-/* no live metrics on stake */
-
-  var swap = $("route-swap");
-  if (swap) swap.addEventListener("click", function () {
-    var from = $("asset-from"), to = $("asset-to"), hold = from.innerHTML;
-    from.innerHTML = to.innerHTML;
-    to.innerHTML = hold;
-  });
-
-  /* AMM / TWAMM route switch (preview label only). */
-  var modeToggle = $("mode-toggle");
-  if (modeToggle) modeToggle.addEventListener("click", function () {
-    var twamm = modeToggle.getAttribute("aria-checked") !== "true";
-    modeToggle.setAttribute("aria-checked", String(twamm));
-    var amm = $("ms-amm"), tw = $("ms-twamm"), name = $("route-name");
-    if (amm) amm.classList.toggle("is-on", !twamm);
-    if (tw) tw.classList.toggle("is-on", twamm);
-    /* no mode toggle */
-  });
-
-  /* Collapsed left menu: off-canvas drawer opened from the topbar, closed by scrim / Esc / link / close button. */
-  var shell = document.querySelector(".shell");
-  var sidebar = document.querySelector(".sidebar");
-  var sideNav = $("sideNav");
-  var scrim = document.querySelector("[data-scrim]");
-  var openBtn = document.querySelector("[data-nav-open]");
-  var closeBtn = document.querySelector(".nav-toggle");
-  function setNav(open) {
-    if (sidebar) sidebar.classList.toggle("is-open", open);
-    if (scrim) scrim.classList.toggle("is-open", open);
-    if (shell) shell.classList.toggle("nav-open", open);
-    if (openBtn) openBtn.setAttribute("aria-expanded", String(open));
-    if (closeBtn) closeBtn.setAttribute("aria-expanded", String(open));
-  }
-  if (openBtn) openBtn.addEventListener("click", function () { setNav(!(sidebar && sidebar.classList.contains("is-open"))); });
-  if (closeBtn) closeBtn.addEventListener("click", function () { setNav(false); });
-  if (scrim) scrim.addEventListener("click", function () { setNav(false); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") setNav(false); });
-  if (sideNav) sideNav.addEventListener("click", function (e) { if (e.target.closest("a")) setNav(false); });
-
-  /* Scroll-reveal: content is always in the HTML; this only animates it into view. */
-  var reveals = document.querySelectorAll(".reveal");
-  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reveals.length && "IntersectionObserver" in window && !reduce) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
-    reveals.forEach(function (el) { io.observe(el); });
-  } else {
-    reveals.forEach(function (el) { el.classList.add("in"); });
-  }
-
-  /* Open (and reveal) the targeted section accordion when its fragment is used. */
-  function openHashTarget() {
-    var id = location.hash.slice(1);
-    if (!id) return;
-    var el = document.getElementById(id);
-    if (el && el.tagName === "DETAILS") { el.open = true; el.classList.add("in"); }
-  }
-  window.addEventListener("hashchange", openHashTarget);
-  openHashTarget();
-  document.addEventListener("click", function (e) {
-    var a = e.target.closest('a[href^="#"]');
-    if (!a) return;
-    var el = document.getElementById(a.getAttribute("href").slice(1));
-    if (el && el.tagName === "DETAILS") { el.open = true; el.classList.add("in"); }
-  });
-})();
-  (function(){
-    var links=[].slice.call(document.querySelectorAll(".toc a"));
-    if(!links.length)return;
-    var secs=[].slice.call(document.querySelectorAll(".doc-main [id]")).filter(function(s){return document.querySelector('.toc a[href="#'+s.id+'"]');});
-    if(!secs.length)return;
-    function setActive(id){links.forEach(function(a){a.classList.toggle("active",a.getAttribute("href")==="#"+id);});}
-    function update(){var cur=secs[0];for(var i=0;i<secs.length;i++){if(secs[i].getBoundingClientRect().top-120<=0)cur=secs[i];else break;}if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-4)cur=secs[secs.length-1];if(cur)setActive(cur.id);}
-    window.addEventListener("scroll",update,{passive:true});
-    window.addEventListener("resize",update);
-    update();
-  })();
+  <a class="c3918df" href="#content">Skip to content</a>
+  <div class="cbeb98d">
+    <nav class="c3a7a09" aria-label="Primary navigation">
+      <a class="ca2094c" href="#" aria-label="Staking guide home">
+        <span class="c9a1082" aria-hidden="true"><svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M5 19V11a7 7 0 0 1 14 0v8M9 19v-8a3 3 0 0 1 6 0v8" stroke="var(--accent-ink)" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+        Staking guide
+      </a>
+      <div class="c06bc2d">
+        <a class="c8628d8" href="#key-facts">Key facts</a>
+        <a class="c8628d8" href="#sources">Sources</a>
+        <a class="cbf9315" href="dashboard/">Open app <span aria-hidden="true">в†—</span></a>
+      </div>
+    </nav>
+    <div class="c1d4fab"><nav class="c920e8e" aria-label="Breadcrumb"><a href="dashboard/">Home</a> <span>/</span> <span>Staking</span> <span>/</span> <span>StakeStone</span></nav></div>
+    <section class="ceeabbb" aria-labelledby="hero-heading">
+      <div class="cb34a1e">
+        <span class="c1061d5">Staking calculator</span>
+        <h1 id="hero-heading">StakeStone <em>Staking</em>.</h1>
+        <p class="c87c286">StakeStone is an omnichain liquid staking and liquidity protocol: you stake ETH and receive STONE, a yield-bearing token that keeps earning validator rewards while you move it across Ethereum, Arbitrum, Mantle and other supported chains. A parallel product, SBTC, extends the same idea to Bitcoin liquidity, letting BTC holders put idle coins to work without giving up the ability to use that value elsewhere. Enter an amount, an APY and a period into the rewards calculator below to see what StakeStone staking could return before you commit a single transaction.</p>
+        <a class="c8da07e" href="dashboard/">Open app <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="var(--accent-ink)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <p class="c23f772">Set the amount and APY. Pick a period. See the rewards.</p>
+      </div>
+      <aside class="c120d23" aria-labelledby="calculator-heading">
+        <div class="ce98dd3">
+          <h2 id="calculator-heading">Your staking rewards</h2>
+          <span class="c3265b7">Rewards</span>
+        </div>
+        <div class="c561fc9" aria-label="Staked asset">
+          <div class="ce472d4"><span class="ce649eb"><img src="assets/tokens/eth.svg" alt="Ethereum" width="28" height="28"></span><span class="c859428">Staked asset</span></div>
+        </div>
+        <div class="cd75771">
+          <div class="c681b69"><label for="amount">Amount staked</label><span class="cc154a5">Your deposit</span></div>
+          <div class="c4560b3"><input id="amount" type="text" inputmode="decimal" value="1000" autocomplete="off" spellcheck="false" maxlength="24" aria-describedby="amount-help" aria-invalid="false"><span>units</span></div>
+          <p id="amount-help" class="c5e7d28">Enter an amount from 1 to 1,000,000 units.</p>
+        </div>
+        <div class="cdf6e76">
+          <div class="cd75771">
+            <div class="c681b69"><label for="apy">APY</label><span class="cc154a5">Annual %</span></div>
+            <div class="c4560b3"><input id="apy" type="text" inputmode="decimal" value="5" autocomplete="off" spellcheck="false" maxlength="6" aria-describedby="apy-help" aria-invalid="false"><span>%</span></div>
+          </div>
+          <div class="cd75771">
+            <div class="c681b69"><label for="period">Period</label><span class="cc154a5">Horizon</span></div>
+            <div class="cbb500a"><select id="period" class="c5dc13e"><option value="0.0833">1 month</option><option value="0.5">6 months</option><option value="1" selected>1 year</option><option value="3">3 years</option></select></div>
+          </div>
+        </div>
+        <p id="apy-help" class="c5e7d28">Rewards compound monthly at the APY you enter.</p>
+        <div class="c31771a" aria-live="polite" aria-atomic="true">
+          <p class="c3f39f3">Estimated rewards</p>
+          <div class="c67d52b"><output id="received" for="amount">51.16</output><span>units</span></div>
+          <dl class="c20c0e3">
+            <div><dt>Balance at end</dt><dd><output id="total" for="amount">1,051.16</output> units</dd></div>
+            <div><dt>APY used</dt><dd><output id="apyout" for="amount">5.00%</output></dd></div>
+          </dl>
+        </div>
+        <a class="c8da07e" href="dashboard/">Continue to app <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="var(--accent-ink)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <details class="c69b5c3">
+          <summary>How the estimate works</summary>
+          <p>Rewards compound monthly: the balance at the end equals the amount staked times (1 + APY/12) raised to the number of months in the period, and the estimated rewards are that balance minus your deposit. The APY you enter is the annual rate; actual rates vary with the network and validator.</p>
+        </details>
+        <noscript><p class="c5e7d28">Enable JavaScript to calculate a different amount.</p></noscript>
+      </aside>
+    </section>
+    <section id="key-facts" class="cdf628c" aria-labelledby="facts-heading">
+      <h2 id="facts-heading" class="cb1ca86">Key facts</h2>
+      <div class="c68c4ae"><table class="c9516eb"><tbody><tr><th scope="row">Protocol type</th><td>Omnichain liquid staking & liquidity</td></tr>
+<tr><th scope="row">You stake</th><td>ETH (and BTC via SBTC)</td></tr>
+<tr><th scope="row">You receive</th><td>STONE / SBTC — omnichain yield-bearing tokens</td></tr>
+<tr><th scope="row">Chains supported</th><td>Ethereum, Arbitrum, Mantle, BNB Chain and more</td></tr>
+<tr><th scope="row">Redemption</th><td>Queue-based unstaking back to the underlying asset</td></tr>
+<tr><th scope="row">Custody</th><td>Self-custody — you hold STONE in your own wallet</td></tr></tbody></table></div>
+    </section>
+    <main id="content" class="ce01341">
+      <section class="ca166b4"><h2 class="c40cbe5">What Is StakeStone?</h2><div class="c1be717"><strong>StakeStone is an omnichain liquid staking and liquidity protocol that lets you stake ETH and receive STONE, a yield-bearing token usable across multiple blockchains without ever unstaking.</strong> A conventional liquid staking token is minted on one chain and stays there; StakeStone instead issues STONE as an omnichain asset, so the same token can represent your staked position on Ethereum, Arbitrum, Mantle and other networks the protocol supports, while the validator rewards your underlying ETH earns through Ethereum's proof-of-stake consensus keep accruing underneath it. That consensus mechanism itself is documented on <a href="https://ethereum.org/en/staking/" rel="nofollow noopener" target="_blank">ethereum.org's staking page</a>, and StakeStone's role is to wrap a staked position in a transferable wrapper that travels with you.<h3>What omnichain liquid staking means in practice</h3>An omnichain token is not bridged copy-by-copy between chains; it is minted or recognized natively on each chain the protocol supports, backed by the same pool of staked ETH. That design avoids the fragmented liquidity that happens when a liquid staking token exists as separate, non-fungible wrapped versions on every chain it touches.<h3>Who stakes through StakeStone</h3>Long-term ETH holders who want validator-level rewards without running a node use this protocol, as do DeFi users who want a yield-bearing collateral asset that still functions as a tradable, transferable token on the chain where an opportunity appears, rather than an asset parked and forgotten on one network.</div></section>
+<section class="ca166b4"><h2 class="c40cbe5">STONE: StakeStone's Omnichain Liquid Staking Token</h2><div class="c1be717">When you deposit ETH, the protocol mints STONE at the prevailing exchange rate and that rate rises over time as staking rewards accumulate, rather than paying rewards out as a separate airdrop. Holding STONE is holding a claim on growing underlying ETH, which is why its price against ETH drifts upward instead of staying pegged one-to-one.<h3>How STONE accrues value</h3>Deposited ETH is delegated to a diversified set of validators and node operators, and the resulting rewards compound into the pool backing STONE. You do not need to claim anything separately; the token's redemption value simply increases, a mechanic common to rebasing-free liquid staking designs and one worth comparing against the raw validator economics described in Ethereum's own documentation.<h3>Moving STONE between chains</h3>Because STONE is an omnichain token, moving it from Ethereum to another supported network does not require a separate wrapped version or a third-party bridge contract; the protocol's own messaging layer keeps the token's supply and accounting consistent across chains, which is the core advantage of an omnichain liquid staking token over a single-chain one.</div></section>
+<section class="ca166b4"><h2 class="c40cbe5">SBTC: StakeStone's Bitcoin Liquidity Layer</h2><div class="c1be717">StakeStone extends the same omnichain model to Bitcoin through SBTC, a liquidity token that lets BTC holders deposit their coins and receive a yield-bearing, cross-chain representation in return. Bitcoin itself, described in depth on <a href="https://en.wikipedia.org/wiki/Ethereum" rel="nofollow noopener" target="_blank">Wikipedia's Ethereum overview</a> by comparison as the proof-of-work chain that pre-dates proof-of-stake designs, has no native staking mechanism, so SBTC's yield comes from deploying deposited BTC liquidity into vetted on-chain strategies rather than validator rewards.<h3>Why BTC needs a liquidity layer, not staking</h3>Bitcoin's base protocol has no concept of validators earning block rewards for locking BTC, so a Bitcoin liquidity token like SBTC generates return from lending, market-making or restaking-style strategies that put deposited BTC to work across DeFi, rather than from the protocol-level issuance that backs STONE.<h3>Using SBTC alongside STONE</h3>Holding both STONE and SBTC lets a single user capture yield on ETH and BTC through one consistent omnichain accounting model, which simplifies tracking a multi-asset position compared with juggling separate wrapped tokens issued by unrelated protocols on each chain.</div></section>
+<section class="ca166b4"><h2 class="c40cbe5">StakeStone Staking Rewards, APY and the Rewards Calculator</h2><div class="c1be717">StakeStone's rewards compound into the STONE exchange rate rather than arriving as a visible payout, so the clearest way to picture your return is to project it forward. Enter the amount you plan to stake, the current APY shown in the StakeStone app, and the period you intend to hold, and the calculator compounds that rate across the period to estimate the ETH-equivalent value your STONE balance would represent at the end. Actual APY moves with validator performance and network conditions, so treat the output as a projection you can recheck any time against current aggregate numbers on <a href="https://defillama.com/protocol/stakestone" rel="nofollow noopener" target="_blank">DeFiLlama's StakeStone page</a>, not a locked-in rate.<table><thead><tr><th>Asset staked</th><th>Token received</th><th>Reward source</th></tr></thead><tbody><tr><td>ETH</td><td>STONE</td><td>Ethereum validator staking rewards</td></tr><tr><td>BTC</td><td>SBTC</td><td>On-chain liquidity and lending strategies</td></tr><tr><td>STONE / SBTC in DeFi</td><td>LP or collateral position</td><td>Protocol yield plus DeFi incentives</td></tr></tbody></table></div></section>
+<section class="ca166b4"><h2 class="c40cbe5">How to Stake with StakeStone</h2><div class="c1be717">Staking through StakeStone follows the same handful of steps on every supported chain, which is what makes repeating the process across ETH and BTC straightforward once you have done it once.<ul><li>Connect a self-custody wallet to the app and choose ETH or BTC as the asset to deposit.</li><li>Enter the amount; the app shows the current exchange rate and the STONE or SBTC amount you will receive.</li><li>Approve the asset if required, then sign the deposit transaction and pay network gas.</li><li>Receive STONE or SBTC in your wallet, where its redemption value rises as staking rewards accrue.</li><li>Use the token as collateral or liquidity on any chain it supports, or hold it until you want to redeem.</li></ul></div></section>
+<section class="ca166b4"><h2 class="c40cbe5">Redeeming STONE Through StakeStone</h2><div class="c1be717">Unstaking is not instant because the underlying ETH is actively delegated to validators; StakeStone processes redemptions through a queue that releases the original asset once enough liquidity or validator exits are available. You submit a redemption request for the amount of STONE you hold, the protocol burns that STONE, and ETH is released to your wallet once your position clears the queue — a sequencing you can verify on-chain through <a href="https://etherscan.io/" rel="nofollow noopener" target="_blank">Etherscan</a> by watching the relevant contract address. SBTC redemption works the same way on the Bitcoin-liquidity side, releasing the underlying BTC-equivalent asset once the queue processes your request.<h3>Why redemption isn't instant</h3>Validator exits on Ethereum take time by design, and the redemption queue exists so that a large request does not force the protocol to pull liquidity faster than the network allows, protecting everyone still holding STONE from a disorderly unwind.<h3>Selling STONE instead of redeeming</h3>If you need the underlying value faster than the queue allows, STONE can usually be swapped directly for ETH or a stablecoin on a DEX at close to its redemption rate, trading a small spread for immediate liquidity instead of waiting out the queue.</div></section>
+<section class="ca166b4"><h2 class="c40cbe5">Is StakeStone Safe to Use?</h2><div class="c1be717">StakeStone keeps your assets in your own wallet at every step except while they are actively deposited into the protocol's staking or liquidity contracts, and the exchange rate backing STONE and SBTC is published on-chain for anyone to verify. The usual liquid-staking risks still apply: smart-contract risk in the deposit and redemption contracts, validator performance risk on the ETH side, and strategy risk on the BTC-liquidity side, all of which are standard considerations for any protocol built on top of <a href="https://docs.stakestone.io/" rel="nofollow noopener" target="_blank">StakeStone's own documentation</a> rather than reasons unique to this one.<h3>Checking contracts before you deposit</h3>Confirm the deposit contract address against the official documentation and socials before sending funds, and keep approvals limited to the amount you intend to deposit rather than granting an unlimited allowance.<h3>The one rule that never changes</h3>No staking protocol, wallet or support agent ever needs your seed phrase. It only ever asks you to sign a transaction visible in your own wallet — never to type or paste your recovery words anywhere.</div></section>
+      <details class="cc9caff"><summary class="c4b4529">What is StakeStone?</summary><div class="cb13b17">StakeStone is an omnichain liquid staking and liquidity protocol. You stake ETH and receive STONE, a yield-bearing token usable across multiple chains, or deposit BTC and receive SBTC, a parallel Bitcoin liquidity token.</div></details>
+<details class="cc9caff"><summary class="c4b4529">How does STONE earn yield?</summary><div class="cb13b17">StakeStone delegates deposited ETH to validators, and the resulting staking rewards compound into STONE's exchange rate over time rather than being paid out separately, so STONE's redemption value against ETH rises.</div></details>
+<details class="cc9caff"><summary class="c4b4529">What is SBTC and how is it different from STONE?</summary><div class="cb13b17">SBTC is the protocol's Bitcoin liquidity token. Since Bitcoin has no native staking, SBTC's yield comes from on-chain lending and liquidity strategies rather than validator rewards, unlike STONE's protocol-level staking yield.</div></details>
+<details class="cc9caff"><summary class="c4b4529">Can I use STONE on chains other than Ethereum?</summary><div class="cb13b17">Yes. STONE is an omnichain token, so StakeStone supports it natively across Ethereum, Arbitrum, Mantle and other chains without needing a separate wrapped version on each one.</div></details>
+<details class="cc9caff"><summary class="c4b4529">How accurate is the StakeStone rewards calculator?</summary><div class="cb13b17">The calculator compounds your entered APY across your chosen period to project a return. Actual results move with validator performance and market conditions, so it is an estimate, not a guaranteed rate.</div></details>
+<details class="cc9caff"><summary class="c4b4529">How long does it take to redeem STONE?</summary><div class="cb13b17">Redemption runs through a queue tied to validator exit timing, so it is not instant. If you need liquidity sooner, STONE can typically be swapped on a DEX close to its redemption rate instead.</div></details>
+<details class="cc9caff"><summary class="c4b4529">Is StakeStone custodial?</summary><div class="cb13b17">No. You hold STONE or SBTC in your own wallet at all times; the protocol's contracts only hold the underlying ETH or BTC actively deployed to staking or liquidity strategies.</div></details>
+    </main>
+    <section id="sources" class="cf75545" aria-labelledby="sources-heading">
+      <h2 id="sources-heading" class="cb1ca86">Sources</h2>
+      <ul class="c664e2c"><li><a class="c85ef67" href="https://docs.stakestone.io/" rel="nofollow noopener" target="_blank">StakeStone documentation</a></li>
+<li><a class="c85ef67" href="https://ethereum.org/en/staking/" rel="nofollow noopener" target="_blank">Ethereum staking overview</a></li>
+<li><a class="c85ef67" href="https://defillama.com/protocol/stakestone" rel="nofollow noopener" target="_blank">StakeStone on DeFiLlama</a></li>
+<li><a class="c85ef67" href="https://etherscan.io/" rel="nofollow noopener" target="_blank">Etherscan</a></li></ul>
+    </section>
+    <footer class="ccdaaec">
+      <span class="cee2e93">Staking guide</span>
+      <div>Updated Oct 09, 2026</div>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const amount = document.getElementById('amount');
+      const apy = document.getElementById('apy');
+      const period = document.getElementById('period');
+      const help = document.getElementById('amount-help');
+      const received = document.getElementById('received');
+      const total = document.getElementById('total');
+      const apyout = document.getElementById('apyout');
+      const format = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      let pending;
+      function num(el, min, max) {
+        const raw = el.value.trim();
+        const ok = /^(?:\d+(?:[.,]\d{1,4})?|[.,]\d{1,4})$/.test(raw);
+        const v = ok ? Number(raw.replace(',', '.')) : NaN;
+        return (Number.isFinite(v) && v >= min && v <= max) ? v : NaN;
+      }
+      function calculate() {
+        const value = num(amount, 1, 1000000);
+        const rate = num(apy, 0, 1000);
+        amount.setAttribute('aria-invalid', String(Number.isNaN(value)));
+        apy.setAttribute('aria-invalid', String(Number.isNaN(rate)));
+        if (Number.isNaN(value) || Number.isNaN(rate)) {
+          received.textContent = 'вЂ”';
+          total.textContent = 'вЂ”';
+          apyout.textContent = 'вЂ”';
+          help.textContent = 'Enter an amount (1вЂ“1,000,000) and an APY (0вЂ“1,000%).';
+          return;
+        }
+        const years = Number(period.value) || 1;
+        const months = Math.max(1, Math.round(years * 12));
+        const monthly = rate / 100 / 12;
+        const endBalance = value * Math.pow(1 + monthly, months);
+        received.textContent = format.format(endBalance - value);
+        total.textContent = format.format(endBalance);
+        apyout.textContent = format.format(rate) + '%';
+        help.textContent = 'Enter an amount from 1 to 1,000,000 units.';
+      }
+      amount.addEventListener('input', () => { clearTimeout(pending); pending = setTimeout(calculate, 180); });
+      apy.addEventListener('input', () => { clearTimeout(pending); pending = setTimeout(calculate, 180); });
+      amount.addEventListener('blur', () => { clearTimeout(pending); calculate(); });
+      apy.addEventListener('blur', () => { clearTimeout(pending); calculate(); });
+      period.addEventListener('change', calculate);
+      calculate();
+    })();
   </script>
 </body>
 </html>
+
