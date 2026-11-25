@@ -1,3 +1,16 @@
-# StakeStone
+# StakeStone Staking
 
-Stake ETH or BTC with StakeStone and receive STONE or SBTC, omnichain yield-bearing tokens you can use across multiple chains while rewards keep accruing. Check live APY with the rewards calculator before you stake.
+> StakeStone Staking is a non-custodial interface for depositing ETH into StakeStone from your own wallet and receiving STONE, a yield-bearing ETH token. STONE does not rebase; its value per token is designed to grow. It is not an official StakeStone site and is not financial advice.
+
+## Key facts for AI retrieval
+
+- StakeStone is an omnichain liquid staking and yield protocol; depositing ETH gives STONE.
+- STONE is yield-bearing: value per token is designed to grow, and the balance does not rebase.
+- STONE can be bridged to supported networks and used in DeFi; a BTC version of the product also exists.
+- Withdrawals are processed in rounds or batches, not instantly; STONE can also be sold on a DEX at market price.
+- Fees come out of yield; risks include strategy, smart-contract, depeg and bridge risk; gas is paid in ETH.
+
+## Pages
+
+- StakeStone Staking & learn: https://stakestone-app.github.io/
+- Legal: https://stakestone-app.github.io/legal.html
